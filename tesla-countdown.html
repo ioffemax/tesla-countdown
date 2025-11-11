@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обратный отсчёт до Tesla</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000, #333);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            padding: 20px;
+            border: 2px solid #ff0000; /* Красный акцент Tesla */
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+        .countdown {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+        .time-unit {
+            text-align: center;
+            padding: 10px;
+        }
+        .time-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff0000;
+        }
+        .time-label {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+        #target-date {
+            margin-top: 20px;
+            font-size: 1em;
+            opacity: 0.8;
+        }
+        /* Анимация для обновления */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .time-value { animation: pulse 1s infinite; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 До Tesla осталось...</h1>
+        <div class="countdown">
+            <div class="time-unit">
+                <div class="time-value" id="days">0</div>
+                <div class="time-label">Дней</div>
+            </div>
+            <div class="time-unit">
+                <div class="time-value" id="hours">0</div>
+                <div class="time-label">Часов</div>
+            </div>
+            <div class="time-unit">
+                <div class="time-value" id="minutes">0</div>
+                <div class="time-label">Минут</div>
+            </div>
+            <div class="time-unit">
+                <div class="time-value" id="seconds">0</div>
+                <div class="time-label">Секунд</div>
+            </div>
+        </div>
+        <p id="target-date">Целевая дата: 26 ноября 2025</p>
+    </div>
+
+    <script>
+        // Укажи здесь свою дату в формате YYYY-MM-DD
+        const targetDate = new Date('2025-11-26T09:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.querySelector('.countdown').innerHTML = '<h2>Поздравляем! Твой Tesla здесь! 🎉</h2>';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+
+        // Обновляем каждую секунду
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Первое обновление
+    </script>
+</body>
+</html>
