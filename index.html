@@ -15,55 +15,143 @@
             height: 100vh;
             margin: 0;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
+
+        #vehicle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .container {
-            max-width: 400px;
+            max-width: 600px;
             padding: 20px;
-            border: 2px solid #ff0000; /* Красный акцент Tesla */
+            border: 2px solid #ff0000;
             border-radius: 10px;
             background: rgba(0, 0, 0, 0.8);
+            z-index: 1;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
         }
+
         h1 {
             font-size: 2em;
             margin-bottom: 20px;
             color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
         }
+
         .countdown {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
             font-size: 1.5em;
         }
+
         .time-unit {
             text-align: center;
             padding: 10px;
+            min-width: 80px;
         }
+
         .time-value {
             font-size: 2em;
             font-weight: bold;
             color: #ff0000;
+            animation: pulse 1s infinite;
         }
+
         .time-label {
             font-size: 0.8em;
             opacity: 0.7;
         }
+
         #target-date {
             margin-top: 20px;
             font-size: 1em;
             opacity: 0.8;
         }
-        /* Анимация для обновления */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+
+        .charts-section {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .time-value { animation: pulse 1s infinite; }
+
+        .chart-container {
+            margin: 20px 0;
+            width: 90%;
+            max-width: 450px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            color: #ff0000;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px #ff0000;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid #ff0000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        #percentage-text {
+            font-size: 1em;
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        #adjusted-countdown {
+            font-size: 1.2em;
+            color: #00ff00;
+            margin-top: 10px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <canvas id="vehicle-canvas"></canvas>
     <div class="container">
-        <h1>🚀 До Tesla осталось...</h1>
+        <h1>🚀 До твоего Tesla осталось...</h1>
         <div class="countdown">
             <div class="time-unit">
                 <div class="time-value" id="days">0</div>
@@ -82,36 +170,238 @@
                 <div class="time-label">Секунд</div>
             </div>
         </div>
-        <p id="target-date">Целевая дата: 26 ноября 2025</p>
+        <p id="target-date">Целевая дата: 15 декабря 2025</p>
+        <div class="charts-section">
+            <div>
+                <div class="chart-title">Процент времени, которое уже прошло</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div id="percentage-text">0%</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="weekend-chart"></canvas>
+            </div>
+            <div class="chart-title">Время на выходных (ускорено x1.5)</div>
+            <p id="adjusted-countdown">Ускоренный отсчёт: ~X дней (благодаря выходным!)</p>
+            <div class="chart-container">
+                <canvas id="time-wave-chart"></canvas>
+            </div>
+            <div class="chart-title">Волны ускорения времени</div>
+        </div>
     </div>
-
     <script>
-        // Укажи здесь свою дату в формате YYYY-MM-DD
-        const targetDate = new Date('2025-11-26T09:00:00').getTime();
+        // Анимация летающих Tesla и Starship
+        const canvas = document.getElementById('vehicle-canvas');
+        let canvasSupported = true;
+        if (!canvas || !canvas.getContext) {
+            console.log('Canvas не поддерживается или не найден');
+            canvasSupported = false;
+        }
+        const ctx = canvasSupported ? canvas.getContext('2d') : null;
+        if (canvasSupported) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const vehicles = [];
+
+            // Корректные base64 иконки
+            const teslaIcon = new Image();
+            teslaIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNMTEuOTkgMGgtLjAxQzUuMzYgMCAwIDUuMzYgMCAxMi4wMHM1LjM2IDEyLjAyIDEyLjAyIDEyLjAyIDEyLjAyLTUuMzYgMTIuMDItMTIuMDJTMjAuNjIgMCAxMi4wMiAwem0tMS40OCA2LjY0bDIuOTgtLjI0IDMuMyA4LjA0LS45LjI3LTQuNjktNS44My0yLjQ0IDMuODMtMS41MS00LjQiLz48L3N2Zz4=';
+
+            const starshipIcon = new Image();
+            starshipIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDA3N0ZmIj48cGF0aCBkPSJNMTEuMTggLjE5bC42NSAxLjQ3LTIuNTkgMi4wNi01LjM2LTQuMTR6TTEyLjAxIDMuMTVsLjgzIDIuMjcgMS45OS0uNTMtMi44Mi0xLjc0em0yLjk0IDQuNjVsMi41Ny42OC01LjQ1IDEwLjI2LTEuMzEtMi4wNC4wOC0xLjYyLjM0LTIuOTYtLjkyLS41NCAxLjgyLTMuMDgtLjU1LTIuNDgtMy45NC0xLjM3LTEuNzkgMS43NCAzLjI5IDQuNzUtLjc1IDMuMjEgMS43OSAxLjg2LjM1IDMuNTRsLS42NiAxLjUzLTEuODQtLjM4eiIvPjwvc3ZnPg==';
+
+            class Vehicle {
+                constructor(icon, speed, size) {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.dx = (Math.random() - 0.5) * speed;
+                    this.dy = (Math.random() - 0.5) * speed;
+                    this.icon = icon;
+                    this.size = size;
+                    this.opacity = Math.random() * 0.5 + 0.5;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.opacity;
+                    ctx.drawImage(this.icon, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+                    ctx.restore();
+                }
+                update() {
+                    this.x += this.dx;
+                    this.y += this.dy;
+                    if (this.x > canvas.width || this.x < 0) this.dx = -this.dx;
+                    if (this.y > canvas.height || this.y < 0) this.dy = -this.dy;
+                    this.draw();
+                }
+            }
+
+            function initVehicles() {
+                for (let i = 0; i < 15; i++) {
+                    vehicles.push(new Vehicle(teslaIcon, 0.5, 30));
+                    vehicles.push(new Vehicle(starshipIcon, 0.3, 40));
+                }
+            }
+
+            function animateCanvas() {
+                requestAnimationFrame(animateCanvas);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                vehicles.forEach(vehicle => vehicle.update());
+            }
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+
+            // Проверка загрузки иконок
+            let iconsLoaded = 0;
+            const totalIcons = 2;
+            function checkIcons() {
+                iconsLoaded++;
+                if (iconsLoaded === totalIcons) {
+                    initVehicles();
+                    animateCanvas();
+                }
+            }
+            teslaIcon.onload = checkIcons;
+            starshipIcon.onload = checkIcons;
+            teslaIcon.onerror = () => console.log('Ошибка загрузки Tesla иконки');
+            starshipIcon.onerror = () => console.log('Ошибка загрузки Starship иконки');
+        }
+
+        // Обратный отсчёт и графики
+        const targetDate = new Date("November 26, 2025 09:00:00").getTime();
+        const startDate = new Date("November 11, 2025 09:00:00").getTime();
+        const totalDuration = targetDate - startDate;
+        const timeUnits = {
+            days: document.getElementById('days'),
+            hours: document.getElementById('hours'),
+            minutes: document.getElementById('minutes'),
+            seconds: document.getElementById('seconds')
+        };
+        const progressFill = document.getElementById('progress-fill');
+        const percentageText = document.getElementById('percentage-text');
+        const adjustedCountdown = document.getElementById('adjusted-countdown');
+
+        // Chart.js: Выходные дни
+        const weekendCtx = document.getElementById('weekend-chart').getContext('2d');
+        const weekendChart = new Chart(weekendCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'],
+                datasets: [{
+                    label: 'Ускорение времени (x)',
+                    data: [1, 1, 1, 1, 1.5, 1.5, 1],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)', 'rgba(0, 255, 0, 0.7)',
+                        'rgba(0, 255, 0, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(0, 255, 0, 1)',
+                        'rgba(0, 255, 0, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 2, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'white' } }, x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'white' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Chart.js: Волны ускорения времени
+        const timeWaveCtx = document.getElementById('time-wave-chart').getContext('2d');
+        const waveData = Array.from({ length: 60 }, (_, i) => 1 + Math.sin(i / 10) * 0.3 + Math.random() * 0.1);
+        const timeWaveChart = new Chart(timeWaveCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({ length: 15 }, (_, i) => i % 10 === 0 ? `День ${i}` : ''),
+                datasets: [{
+                    label: 'Ощущаемая скорость времени (у.е.)',
+                    data: waveData,
+                    borderColor: 'rgb(255, 0, 0)',
+                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { min: 0.5, max: 2, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'white' } }, x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'white' } } },
+                plugins: { legend: { display: false } }
+            }
+        });
 
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
-
-            if (distance < 0) {
-                document.querySelector('.countdown').innerHTML = '<h2>Поздравляем! Твой Tesla здесь! 🎉</h2>';
-                return;
-            }
-
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            document.getElementById('days').textContent = days;
-            document.getElementById('hours').textContent = hours;
-            document.getElementById('minutes').textContent = minutes;
-            document.getElementById('seconds').textContent = seconds;
+            if (distance < 0) {
+                timeUnits.days.innerHTML = timeUnits.hours.innerHTML = timeUnits.minutes.innerHTML = timeUnits.seconds.innerHTML = "0";
+                document.querySelector('h1').innerHTML = "🥳 Tesla уже у тебя!";
+                percentageText.innerHTML = "100%";
+                progressFill.style.width = "100%";
+                clearInterval(interval);
+                return;
+            }
+
+            timeUnits.days.innerHTML = days.toString().padStart(2, '0');
+            timeUnits.hours.innerHTML = hours.toString().padStart(2, '0');
+            timeUnits.minutes.innerHTML = minutes.toString().padStart(2, '0');
+            timeUnits.seconds.innerHTML = seconds.toString().padStart(2, '0');
+
+            const elapsed = now - startDate;
+            let percentage = (elapsed / totalDuration) * 100;
+            if (percentage > 100) percentage = 100;
+            progressFill.style.width = percentage.toFixed(2) + "%";
+            percentageText.innerHTML = percentage.toFixed(2) + "%";
+
+            let acceleratedDays = 0;
+            let tempDate = new Date(now);
+            let timeRemaining = distance;
+            while (timeRemaining > 0) {
+                const dayOfWeek = tempDate.getDay();
+                const accelerationFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 1.5 : 1;
+                acceleratedDays += 1 / accelerationFactor;
+                timeRemaining -= (1000 * 60 * 60 * 24);
+                tempDate.setDate(tempDate.getDate() + 1);
+            }
+
+            const totalDays = Math.ceil(totalDuration / (1000 * 60 * 60 * 24));
+            let weekendDays = 0;
+            let currentDay = new Date(startDate);
+            for (let i = 0; i < totalDays; i++) {
+                const dayOfWeek = currentDay.getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) weekendDays++;
+                currentDay.setDate(currentDay.getDate() + 1);
+            }
+            const workingDays = totalDays - weekendDays;
+            const effectiveDays = workingDays + (weekendDays / 1.5);
+            const remainingEffectiveDays = effectiveDays * (1 - percentage / 100);
+
+            adjustedCountdown.innerHTML = `Ускоренный отсчёт: ~${Math.ceil(remainingEffectiveDays)} дней (благодаря выходным!)`;
+
+            const newWaveData = [...waveData.slice(1), waveData[0]];
+            timeWaveChart.data.datasets[0].data = newWaveData;
+            timeWaveChart.update();
+            waveData.shift();
+            waveData.push(1 + Math.sin(now / 1000000) * 0.3 + Math.random() * 0.1);
         }
 
-        // Обновляем каждую секунду
-        setInterval(updateCountdown, 1000);
-        updateCountdown(); // Первое обновление
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
