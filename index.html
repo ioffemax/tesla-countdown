@@ -11,14 +11,13 @@
             color: white;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start; /* Изменено с center для мобильной версии */
+            min-height: 100vh; /* Минимальная высота для заполнения экрана */
             margin: 0;
             text-align: center;
             position: relative;
-            overflow: hidden;
+            overflow: auto; /* Позволяет прокрутку, если обрезается */
         }
-
         #vehicle-canvas {
             position: absolute;
             top: 0;
@@ -28,7 +27,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         .container {
             max-width: 600px;
             padding: 20px;
@@ -38,53 +36,47 @@
             z-index: 1;
             position: relative;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            width: 90%; /* Адаптация для мобильных */
+            margin-top: 10px; /* Отступ сверху */
         }
-
         h1 {
             font-size: 2em;
             margin-bottom: 20px;
             color: #ff0000;
             text-shadow: 0 0 10px #ff0000;
         }
-
         .countdown {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
             font-size: 1.5em;
         }
-
         .time-unit {
             text-align: center;
             padding: 10px;
             min-width: 80px;
         }
-
         .time-value {
             font-size: 2em;
             font-weight: bold;
             color: #ff0000;
             animation: pulse 1s infinite;
         }
-
         .time-label {
             font-size: 0.8em;
             opacity: 0.7;
         }
-
         #target-date {
             margin-top: 20px;
             font-size: 1em;
             opacity: 0.8;
         }
-
         .charts-section {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .chart-container {
             margin: 20px 0;
             width: 90%;
@@ -94,14 +86,12 @@
             padding: 10px;
             border-radius: 5px;
         }
-
         .chart-title {
             font-size: 1.2em;
             color: #ff0000;
             margin-bottom: 10px;
             text-shadow: 0 0 5px #ff0000;
         }
-
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -111,38 +101,48 @@
             margin: 10px 0;
             border: 1px solid #ff0000;
         }
-
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #ff0000, #ff6600);
             width: 0%;
             transition: width 1s ease;
         }
-
         #percentage-text {
             font-size: 1em;
             color: #ff0000;
             font-weight: bold;
         }
-
         #adjusted-countdown {
             font-size: 1.2em;
             color: #00ff00;
             margin-top: 10px;
             text-shadow: 0 0 5px #00ff00;
         }
-
         @keyframes pulse {
             0% {
                 transform: scale(1);
             }
-
             50% {
                 transform: scale(1.05);
             }
-
             100% {
                 transform: scale(1);
+            }
+        }
+        /* Медиа-запросы для мобильных устройств */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+                margin-top: 5px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .time-value {
+                font-size: 1.5em;
+            }
+            .chart-container {
+                height: 200px;
             }
         }
     </style>
@@ -170,7 +170,7 @@
                 <div class="time-label">Секунд</div>
             </div>
         </div>
-        <p id="target-date">Целевая дата: 26 Ноября 2025</p>
+        <p id="target-date">Целевая дата: 15 декабря 2025</p>
         <div class="charts-section">
             <div>
                 <div class="chart-title">Процент времени, которое уже прошло</div>
@@ -203,14 +203,11 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             const vehicles = [];
-
-            // Корректные base64 иконки
+            // Улучшенные base64 иконки
             const teslaIcon = new Image();
-            teslaIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNMTEuOTkgMGgtLjAxQzUuMzYgMCAwIDUuMzYgMCAxMi4wMHM1LjM2IDEyLjAyIDEyLjAyIDEyLjAyIDEyLjAyLTUuMzYgMTIuMDItMTIuMDJTMjAuNjIgMCAxMi4wMiAwem0tMS40OCA2LjY0bDIuOTgtLjI0IDMuMyA4LjA0LS45LjI3LTQuNjktNS44My0yLjQ0IDMuODMtMS41MS00LjQiLz48L3N2Zz4=';
-
+            teslaIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNMTEuOTkgMGgtLjAxQzUuMzYgMCAwIDUuMzYgMCAxMi4wMHM1LjM2IDEyLjAyIDEyLjAyIDEyLjAyIDEyLjAyLTUuMzYgMTIuMDItMTIuMDJTMjAuNjIgMCAxMi4wMiAwem0tMS40OCA2LjY0bDIuOTgtLjI0IDMuMyA4LjA0LS45LjI3LTQuNjktNS44My0yLjQ0IDMuODMtMS41MS00LjQiLz48L3N2Zz4=';
             const starshipIcon = new Image();
-            starshipIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDA3N0ZmIj48cGF0aCBkPSJNMTEuMTggLjE5bC42NSAxLjQ3LTIuNTkgMi4wNi01LjM2LTQuMTR6TTEyLjAxIDMuMTVsLjgzIDIuMjcgMS45OS0uNTMtMi44Mi0xLjc0em0yLjk0IDQuNjVsMi41Ny42OC01LjQ1IDEwLjI2LTEuMzEtMi4wNC4wOC0xLjYyLjM0LTIuOTYtLjkyLS41NCAxLjgyLTMuMDgtLjU1LTIuNDgtMy45NC0xLjM3LTEuNzkgMS43NCAzLjI5IDQuNzUtLjc1IDMuMjEgMS43OSAxLjg2LjM1IDMuNTRsLS42NiAxLjUzLTEuODQtLjM4eiIvPjwvc3ZnPg==';
-
+            starshipIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDA3N0ZmIj48cGF0aCBkPSJNMTEuMTggMC42NmwtLjQxIDEuNDEgMi41OSAyLjA2IDUuMzYtNC4xNHpNMTIuNDggMy42MmwtLjgzIDIuMjcgMS45OS0uNTMgMi44Mi0xLjc0em0yLjk0IDQuMTVsLTIuNTcuNjggNS40NSAxMC4yNiAxLjMxLTIuMDQtLjA4LTEuNjItLjM0LTIuOTYuOTItLjU0LTEuODItMy4wOC41NS0yLjQ4IDMuOTQtMS4zNyAxLjc5IDEuNzQtMy4yOS00Ljc1LS43NS0zLjIxIDEuNzktMS44Ni0uMzUtMy41NGwuNjYtMS41MyAxLjg0LjM4eiIvPjwvc3ZnPg==';
             class Vehicle {
                 constructor(icon, speed, size) {
                     this.x = Math.random() * canvas.width;
@@ -235,25 +232,21 @@
                     this.draw();
                 }
             }
-
             function initVehicles() {
                 for (let i = 0; i < 15; i++) {
-                    vehicles.push(new Vehicle(teslaIcon, 0.5, 30));
-                    vehicles.push(new Vehicle(starshipIcon, 0.3, 40));
+                    vehicles.push(new Vehicle(teslaIcon, 0.5, 50)); // Увеличен размер
+                    vehicles.push(new Vehicle(starshipIcon, 0.3, 60)); // Увеличен размер
                 }
             }
-
             function animateCanvas() {
                 requestAnimationFrame(animateCanvas);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 vehicles.forEach(vehicle => vehicle.update());
             }
-
             window.addEventListener('resize', () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             });
-
             // Проверка загрузки иконок
             let iconsLoaded = 0;
             const totalIcons = 2;
@@ -269,7 +262,6 @@
             teslaIcon.onerror = () => console.log('Ошибка загрузки Tesla иконки');
             starshipIcon.onerror = () => console.log('Ошибка загрузки Starship иконки');
         }
-
         // Обратный отсчёт и графики
         const targetDate = new Date("November 26, 2025 09:00:00").getTime();
         const startDate = new Date("November 11, 2025 09:00:00").getTime();
@@ -283,7 +275,6 @@
         const progressFill = document.getElementById('progress-fill');
         const percentageText = document.getElementById('percentage-text');
         const adjustedCountdown = document.getElementById('adjusted-countdown');
-
         // Chart.js: Выходные дни
         const weekendCtx = document.getElementById('weekend-chart').getContext('2d');
         const weekendChart = new Chart(weekendCtx, {
@@ -313,14 +304,13 @@
                 plugins: { legend: { display: false } }
             }
         });
-
         // Chart.js: Волны ускорения времени
         const timeWaveCtx = document.getElementById('time-wave-chart').getContext('2d');
-        const waveData = Array.from({ length: 60 }, (_, i) => 1 + Math.sin(i / 10) * 0.3 + Math.random() * 0.1);
+        const waveData = Array.from({ length: 60 }, (_, i) => 1 + Math.sin(i / 10) * 0.3 + Math.random() * 0.1); // Исправлено на 60 для точности волны
         const timeWaveChart = new Chart(timeWaveCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 15 }, (_, i) => i % 10 === 0 ? `День ${i}` : ''),
+                labels: Array.from({ length: 60 }, (_, i) => i % 10 === 0 ? `День ${i}` : ''),
                 datasets: [{
                     label: 'Ощущаемая скорость времени (у.е.)',
                     data: waveData,
@@ -339,7 +329,6 @@
                 plugins: { legend: { display: false } }
             }
         });
-
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
@@ -347,7 +336,6 @@
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
             if (distance < 0) {
                 timeUnits.days.innerHTML = timeUnits.hours.innerHTML = timeUnits.minutes.innerHTML = timeUnits.seconds.innerHTML = "0";
                 document.querySelector('h1').innerHTML = "🥳 Tesla уже у тебя!";
@@ -356,18 +344,15 @@
                 clearInterval(interval);
                 return;
             }
-
             timeUnits.days.innerHTML = days.toString().padStart(2, '0');
             timeUnits.hours.innerHTML = hours.toString().padStart(2, '0');
             timeUnits.minutes.innerHTML = minutes.toString().padStart(2, '0');
             timeUnits.seconds.innerHTML = seconds.toString().padStart(2, '0');
-
             const elapsed = now - startDate;
             let percentage = (elapsed / totalDuration) * 100;
             if (percentage > 100) percentage = 100;
             progressFill.style.width = percentage.toFixed(2) + "%";
             percentageText.innerHTML = percentage.toFixed(2) + "%";
-
             let acceleratedDays = 0;
             let tempDate = new Date(now);
             let timeRemaining = distance;
@@ -378,7 +363,6 @@
                 timeRemaining -= (1000 * 60 * 60 * 24);
                 tempDate.setDate(tempDate.getDate() + 1);
             }
-
             const totalDays = Math.ceil(totalDuration / (1000 * 60 * 60 * 24));
             let weekendDays = 0;
             let currentDay = new Date(startDate);
@@ -390,19 +374,15 @@
             const workingDays = totalDays - weekendDays;
             const effectiveDays = workingDays + (weekendDays / 1.5);
             const remainingEffectiveDays = effectiveDays * (1 - percentage / 100);
-
             adjustedCountdown.innerHTML = `Ускоренный отсчёт: ~${Math.ceil(remainingEffectiveDays)} дней (благодаря выходным!)`;
-
             const newWaveData = [...waveData.slice(1), waveData[0]];
             timeWaveChart.data.datasets[0].data = newWaveData;
             timeWaveChart.update();
             waveData.shift();
             waveData.push(1 + Math.sin(now / 1000000) * 0.3 + Math.random() * 0.1);
         }
-
         updateCountdown();
         const interval = setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
-
