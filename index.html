@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #000, #333);
+            background: linear-gradient(135deg, #000, #1a001a);
             color: white;
             display: flex;
             justify-content: center;
@@ -17,7 +17,11 @@
             text-align: center;
             position: relative;
             overflow: auto;
+            font-family: 'Orbitron', sans-serif;
         }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+
         #vehicle-canvas {
             position: absolute;
             top: 0;
@@ -27,133 +31,328 @@
             pointer-events: none;
             z-index: 0;
         }
+
         .container {
             max-width: 600px;
             padding: 20px;
-            border: 2px solid #ff0000;
-            border-radius: 10px;
+            border: 3px dashed #ff00ff;
+            border-radius: 15px;
             background: rgba(0, 0, 0, 0.8);
             z-index: 1;
             position: relative;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 30px #00ff00, 0 0 20px #ff00ff;
             width: 90%;
             margin-top: 10px;
         }
+
         h1 {
-            font-size: 2em;
+            font-size: 2.5em;
             margin-bottom: 20px;
-            color: #ff0000;
-            text-shadow: 0 0 10px #ff0000;
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff, 0 0 10px #00ff00;
+            animation: neonBlink 2s infinite alternate;
         }
+
         .countdown {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
             font-size: 1.5em;
-            flex-wrap: wrap; /* Разрешаем перенос элементов на маленьких экранах */
+            flex-wrap: wrap;
         }
+
         .time-unit {
             text-align: center;
             padding: 10px;
             min-width: 80px;
-            flex: 1 1 80px; /* Гибкость для адаптации */
+            flex: 1 1 80px;
+            background: rgba(255, 0, 255, 0.2);
+            border-radius: 10px;
+            border: 1px solid #00ff00;
         }
+
         .time-value {
-            font-size: 2em;
+            font-size: 2.5em;
             font-weight: bold;
-            color: #ff0000;
-            animation: pulse 1s infinite;
+            color: #ff00ff;
+            animation: pulse 1.5s infinite;
+            text-shadow: 0 0 10px #ff00ff;
         }
+
         .time-label {
-            font-size: 0.8em;
-            opacity: 0.7;
+            font-size: 0.9em;
+            opacity: 0.8;
+            color: #00ff00;
         }
+
         #target-date {
             margin-top: 20px;
-            font-size: 1em;
-            opacity: 0.8;
+            font-size: 1.2em;
+            opacity: 0.9;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
         }
+
         .charts-section {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         .chart-container {
             margin: 20px 0;
-            width: 100%; /* Полная ширина внутри контейнера */
+            width: 100%;
             max-width: 450px;
             height: 250px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 255, 255, 0.1);
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 10px;
+            border: 2px solid #ff00ff;
         }
+
         .chart-title {
-            font-size: 1.2em;
-            color: #ff0000;
+            font-size: 1.3em;
+            color: #ff00ff;
             margin-bottom: 10px;
-            text-shadow: 0 0 5px #ff0000;
+            text-shadow: 0 0 10px #ff00ff;
         }
+
         .progress-bar {
             width: 100%;
-            height: 20px;
-            background: #333;
-            border-radius: 10px;
+            height: 25px;
+            background: #1a001a;
+            border-radius: 15px;
             overflow: hidden;
-            margin: 10px 0;
-            border: 1px solid #ff0000;
+            margin: 15px 0;
+            border: 2px dashed #00ff00;
         }
+
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff6600);
+            background: linear-gradient(90deg, #ff00ff, #00ff00);
             width: 0%;
             transition: width 1s ease;
+            box-shadow: 0 0 10px #00ff00;
         }
+
         #percentage-text {
-            font-size: 1em;
-            color: #ff0000;
-            font-weight: bold;
-        }
-        #adjusted-countdown {
             font-size: 1.2em;
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        #adjusted-countdown {
+            font-size: 1.3em;
             color: #00ff00;
             margin-top: 10px;
-            text-shadow: 0 0 5px #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            animation: neonGlow 2s infinite alternate;
         }
+
         @keyframes pulse {
             0% {
                 transform: scale(1);
             }
+
             50% {
-                transform: scale(1.05);
+                transform: scale(1.1);
             }
+
             100% {
                 transform: scale(1);
             }
         }
-        /* Медиа-запросы для мобильных устройств */
+
+        @keyframes neonBlink {
+            0% {
+                color: #ff00ff;
+                text-shadow: 0 0 15px #ff00ff;
+            }
+
+            50% {
+                color: #00ff00;
+                text-shadow: 0 0 15px #00ff00;
+            }
+
+            100% {
+                color: #ff00ff;
+                text-shadow: 0 0 15px #ff00ff;
+            }
+        }
+
+        @keyframes neonGlow {
+            0% {
+                text-shadow: 0 0 10px #00ff00;
+            }
+
+            100% {
+                text-shadow: 0 0 20px #00ff00, 0 0 30px #ff00ff;
+            }
+        }
+
+        .calendar-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(45deg, #1a001a, #000066);
+            border: 2px dashed #ff00ff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #00ff00;
+            animation: calendarPulse 3s infinite;
+        }
+
+        .calendar-title {
+            font-size: 1.5em;
+            color: #ff00ff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px #ff00ff;
+            animation: neonBlink 2s infinite alternate;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .calendar-day {
+            padding: 8px;
+            border: 1px solid #00ffff;
+            border-radius: 50%;
+            font-size: 1em;
+            background: rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+            .calendar-day:hover {
+                transform: scale(1.2);
+                background: rgba(255, 0, 255, 0.3);
+                box-shadow: 0 0 15px #ff00ff;
+            }
+
+            .calendar-day.past {
+                color: #666;
+                opacity: 0.7;
+                background: rgba(255, 0, 0, 0.1);
+            }
+
+                .calendar-day.past::after {
+                    content: "X";
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: #ff0000 !important;
+                    font-size: 2em;
+                    font-weight: bold;
+                    text-shadow: 0 0 15px #ff0000;
+                    animation: crossFade 1s infinite;
+                }
+
+            .calendar-day.current {
+                background: linear-gradient(45deg, #ff00ff, #00ff00);
+                color: #000;
+                font-weight: bold;
+                text-shadow: 0 0 5px #fff;
+                animation: pulse 1.5s infinite;
+            }
+
+                .calendar-day.current::before {
+                    content: "⭐";
+                    position: absolute;
+                    top: -5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #ffff00;
+                    animation: starTwinkle 2s infinite;
+                }
+
+        @keyframes calendarPulse {
+            0% {
+                box-shadow: 0 0 20px #00ff00;
+            }
+
+            50% {
+                box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ff00;
+            }
+
+            100% {
+                box-shadow: 0 0 20px #00ff00;
+            }
+        }
+
+        @keyframes crossFade {
+            0% {
+                opacity: 0.7;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes starTwinkle {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
                 margin-top: 5px;
-                max-width: 100%; /* Уменьшаем до полной ширины экрана */
+                max-width: 100%;
             }
+
             h1 {
-                font-size: 1.5em;
+                font-size: 1.8em;
             }
+
             .time-value {
-                font-size: 1.5em;
+                font-size: 1.8em;
             }
+
             .chart-container {
                 height: 200px;
-                max-width: 100%; /* Графики адаптируются под ширину */
+                max-width: 100%;
             }
+
             .countdown {
-                font-size: 1.2em; /* Уменьшаем шрифт для компактности */
+                font-size: 1.2em;
             }
+
             .time-unit {
-                min-width: 60px; /* Уменьшаем минимальную ширину */
+                min-width: 60px;
                 flex: 1 1 60px;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .calendar-day {
+                font-size: 0.9em;
+                padding: 5px;
+            }
+
+            .calendar-title {
+                font-size: 1.2em;
             }
         }
     </style>
@@ -181,20 +380,24 @@
                 <div class="time-label">Секунд</div>
             </div>
         </div>
-        <p id="target-date">Целевая дата: 26 ноября 2025</p>
-        <div class="charts-section">
-            <div>
-                <div class="chart-title">Процент времени, которое уже прошло</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div id="percentage-text">0%</div>
+        <p id="target-date">Целевая дата: 26 ноября 2025 9:00</p>
+        <div>
+            <div class="chart-title">Процент времени, которое уже прошло</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
             </div>
+            <div id="percentage-text">0%</div>
+        </div>
+        <div class="calendar-section">
+            <div class="calendar-title">🌌 Календарь до Твоего Космо-Приключения! 🌠</div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+        <div class="charts-section">
             <div class="chart-container">
                 <canvas id="weekend-chart"></canvas>
             </div>
             <div class="chart-title">Время на выходных (ускорено x1.5)</div>
-            <p id="adjusted-countdown">Ускоренный отсчёт: ~X дней (благодаря выходным!)</p>
+            <p id="adjusted-countdown">Ускоренный отсчёт: ~X дней (ВЫХОДНЫЕ РУЛЯТ! 🚀)</p>
             <div class="chart-container">
                 <canvas id="time-wave-chart"></canvas>
             </div>
@@ -202,7 +405,7 @@
         </div>
     </div>
     <script>
-        // Анимация летающих Tesla и Starship
+        // Анимация летающих иконок (Tesla и SpaceX/Starship)
         const canvas = document.getElementById('vehicle-canvas');
         let canvasSupported = true;
         if (!canvas || !canvas.getContext) {
@@ -214,11 +417,12 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             const vehicles = [];
-            // Улучшенные base64 иконки
+            // Внешние SVG-логотипы
             const teslaIcon = new Image();
-            teslaIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjZmYwMDAwIj48cGF0aCBkPSJNMTEuOTkgMGgtLjAxQzUuMzYgMCAwIDUuMzYgMCAxMi4wMHM1LjM2IDEyLjAyIDEyLjAyIDEyLjAyIDEyLjAyLTUuMzYgMTIuMDItMTIuMDJTMjAuNjIgMCAxMi4wMiAwem0tMS40OCA2LjY0bDIuOTgtLjI0IDMuMyA4LjA0LS45LjI3LTQuNjktNS44My0yLjQ0IDMuODMtMS41MS00LjQiLz48L3N2Zz4=';
-            const starshipIcon = new Image();
-            starshipIcon.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjMDA3N0ZmIj48cGF0aCBkPSJNMTEuMTggMC42NmwtLjQxIDEuNDEgMi41OSAyLjA2IDUuMzYtNC4xNHpNMTIuNDggMy42MmwtLjgzIDIuMjcgMS45OS0uNTMgMi44Mi0xLjc0em0yLjk0IDQuMTVsLTIuNTcuNjggNS40NSAxMC4yNiAxLjMxLTIuMDQtLjA4LTEuNjItLjM0LTIuOTYuOTItLjU0LTEuODItMy4wOC41NS0yLjQ4IDMuOTQtMS4zNyAxLjc5IDEuNzQtMy4yOS00Ljc1LS43NS0zLjIxIDEuNzktMS44Ni0uMzUtMy41NGwuNjYtMS41MyAxLjg0LjM4eiIvPjwvc3ZnPg==';
+            teslaIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/21/Tesla_logo.svg'; // Логотип Tesla
+            const spacexIcon = new Image();
+            spacexIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/8/85/SpaceX-Logo.svg'; // Логотип SpaceX (для Starship)
+
             class Vehicle {
                 constructor(icon, speed, size) {
                     this.x = Math.random() * canvas.width;
@@ -244,10 +448,21 @@
                 }
             }
             function initVehicles() {
-                for (let i = 0; i < 15; i++) {
-                    vehicles.push(new Vehicle(teslaIcon, 0.5, 50));
-                    vehicles.push(new Vehicle(starshipIcon, 0.3, 60));
+                let iconsLoaded = 0;
+                function checkIcons() {
+                    iconsLoaded++;
+                    if (iconsLoaded === 2) {
+                        for (let i = 0; i < 15; i++) {
+                            vehicles.push(new Vehicle(teslaIcon, 0.5, 50)); // Tesla
+                            vehicles.push(new Vehicle(spacexIcon, 0.3, 60)); // SpaceX/Starship
+                        }
+                        animateCanvas();
+                    }
                 }
+                teslaIcon.onload = checkIcons;
+                spacexIcon.onload = checkIcons;
+                teslaIcon.onerror = () => console.log('Ошибка загрузки Tesla иконки');
+                spacexIcon.onerror = () => console.log('Ошибка загрузки SpaceX иконки');
             }
             function animateCanvas() {
                 requestAnimationFrame(animateCanvas);
@@ -258,20 +473,7 @@
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             });
-            // Проверка загрузки иконок
-            let iconsLoaded = 0;
-            const totalIcons = 2;
-            function checkIcons() {
-                iconsLoaded++;
-                if (iconsLoaded === totalIcons) {
-                    initVehicles();
-                    animateCanvas();
-                }
-            }
-            teslaIcon.onload = checkIcons;
-            starshipIcon.onload = checkIcons;
-            teslaIcon.onerror = () => console.log('Ошибка загрузки Tesla иконки');
-            starshipIcon.onerror = () => console.log('Ошибка загрузки Starship иконки');
+            initVehicles();
         }
         // Обратный отсчёт и графики
         const targetDate = new Date("November 26, 2025 09:00:00").getTime();
@@ -286,7 +488,7 @@
         const progressFill = document.getElementById('progress-fill');
         const percentageText = document.getElementById('percentage-text');
         const adjustedCountdown = document.getElementById('adjusted-countdown');
-        // Chart.js: Выходные дни
+        // Chart.js: Выходные дни (пятница и суббота)
         const weekendCtx = document.getElementById('weekend-chart').getContext('2d');
         const weekendChart = new Chart(weekendCtx, {
             type: 'bar',
@@ -296,14 +498,14 @@
                     label: 'Ускорение времени (x)',
                     data: [1, 1, 1, 1, 1.5, 1.5, 1],
                     backgroundColor: [
-                        'rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)',
-                        'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)', 'rgba(0, 255, 0, 0.7)',
-                        'rgba(0, 255, 0, 0.7)'
+                        'rgba(75, 192, 192, 0.5)', 'rgba(54, 162, 235, 0.5)', 'rgba(255, 206, 86, 0.5)',
+                        'rgba(255, 99, 132, 0.5)', 'rgba(0, 255, 0, 0.7)', 'rgba(0, 255, 0, 0.7)',
+                        'rgba(153, 102, 255, 0.5)'
                     ],
                     borderColor: [
-                        'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(0, 255, 0, 1)',
-                        'rgba(0, 255, 0, 1)'
+                        'rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)', 'rgba(0, 255, 0, 1)', 'rgba(0, 255, 0, 1)',
+                        'rgba(153, 102, 255, 1)'
                     ],
                     borderWidth: 1
                 }]
@@ -315,18 +517,19 @@
                 plugins: { legend: { display: false } }
             }
         });
-        // Chart.js: Волны ускорения времени
+        // Chart.js: Волны ускорения времени (15 дней)
         const timeWaveCtx = document.getElementById('time-wave-chart').getContext('2d');
-        const waveData = Array.from({ length: 60 }, (_, i) => 1 + Math.sin(i / 10) * 0.3 + Math.random() * 0.1);
+        const totalDays = 15;
+        const waveData = Array.from({ length: totalDays }, (_, i) => 1 + Math.sin(i / 3) * 0.3 + Math.random() * 0.1);
         const timeWaveChart = new Chart(timeWaveCtx, {
             type: 'line',
             data: {
-                labels: Array.from({ length: 60 }, (_, i) => i % 10 === 0 ? `День ${i}` : ''),
+                labels: Array.from({ length: totalDays }, (_, i) => i + 1),
                 datasets: [{
                     label: 'Ощущаемая скорость времени (у.е.)',
                     data: waveData,
-                    borderColor: 'rgb(255, 0, 0)',
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                    borderColor: 'rgb(255, 0, 255)',
+                    backgroundColor: 'rgba(255, 0, 255, 0.2)',
                     borderWidth: 2,
                     pointRadius: 0,
                     tension: 0.4,
@@ -349,7 +552,7 @@
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             if (distance < 0) {
                 timeUnits.days.innerHTML = timeUnits.hours.innerHTML = timeUnits.minutes.innerHTML = timeUnits.seconds.innerHTML = "0";
-                document.querySelector('h1').innerHTML = "🥳 Tesla уже у тебя!";
+                document.querySelector('h1').innerHTML = "🥳 Tesla у тебя, КОСМОС ЗОВЁТ! 🌌";
                 percentageText.innerHTML = "100%";
                 progressFill.style.width = "100%";
                 clearInterval(interval);
@@ -369,7 +572,7 @@
             let timeRemaining = distance;
             while (timeRemaining > 0) {
                 const dayOfWeek = tempDate.getDay();
-                const accelerationFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 1.5 : 1;
+                const accelerationFactor = (dayOfWeek === 5 || dayOfWeek === 6) ? 1.5 : 1;
                 acceleratedDays += 1 / accelerationFactor;
                 timeRemaining -= (1000 * 60 * 60 * 24);
                 tempDate.setDate(tempDate.getDate() + 1);
@@ -379,23 +582,43 @@
             let currentDay = new Date(startDate);
             for (let i = 0; i < totalDays; i++) {
                 const dayOfWeek = currentDay.getDay();
-                if (dayOfWeek === 0 || dayOfWeek === 6) weekendDays++;
+                if (dayOfWeek === 5 || dayOfWeek === 6) weekendDays++;
                 currentDay.setDate(currentDay.getDate() + 1);
             }
             const workingDays = totalDays - weekendDays;
             const effectiveDays = workingDays + (weekendDays / 1.5);
             const remainingEffectiveDays = effectiveDays * (1 - percentage / 100);
-            adjustedCountdown.innerHTML = `Ускоренный отсчёт: ~${Math.ceil(remainingEffectiveDays)} дней (благодаря выходным!)`;
+            adjustedCountdown.innerHTML = `Ускоренный отсчёт: ~${Math.ceil(remainingEffectiveDays)} дней (ВЫХОДНЫЕ РУЛЯТ! 🚀)`;
             const newWaveData = [...waveData.slice(1), waveData[0]];
             timeWaveChart.data.datasets[0].data = newWaveData;
             timeWaveChart.update();
             waveData.shift();
             waveData.push(1 + Math.sin(now / 1000000) * 0.3 + Math.random() * 0.1);
         }
-        updateCountdown();
-        const interval = setInterval(updateCountdown, 1000);
+        // Генерация календаря
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const start = new Date("November 11, 2025 09:00:00");
+            const end = new Date("November 26, 2025 09:00:00");
+            const now = new Date();
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = `${d.getDate()} 🌟`;
+                if (d < now) {
+                    dayElement.classList.add('past');
+                } else if (d.toDateString() === now.toDateString()) {
+                    dayElement.classList.add('current');
+                }
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+        // Инициализация при загрузке
+        window.onload = function () {
+            generateCalendar();
+            updateCountdown();
+            const interval = setInterval(updateCountdown, 1000);
+        };
     </script>
 </body>
 </html>
-
-
