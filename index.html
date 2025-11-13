@@ -19,9 +19,7 @@
             overflow: auto;
             font-family: 'Orbitron', sans-serif;
         }
-
         @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
-
         #vehicle-canvas {
             position: absolute;
             top: 0;
@@ -31,7 +29,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         .container {
             max-width: 600px;
             padding: 20px;
@@ -44,7 +41,6 @@
             width: 90%;
             margin-top: 10px;
         }
-
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
@@ -52,7 +48,6 @@
             text-shadow: 0 0 15px #ff00ff, 0 0 10px #00ff00;
             animation: neonBlink 2s infinite alternate;
         }
-
         .countdown {
             display: flex;
             justify-content: space-around;
@@ -60,7 +55,6 @@
             font-size: 1.5em;
             flex-wrap: wrap;
         }
-
         .time-unit {
             text-align: center;
             padding: 10px;
@@ -70,7 +64,6 @@
             border-radius: 10px;
             border: 1px solid #00ff00;
         }
-
         .time-value {
             font-size: 2.5em;
             font-weight: bold;
@@ -78,13 +71,11 @@
             animation: pulse 1.5s infinite;
             text-shadow: 0 0 10px #ff00ff;
         }
-
         .time-label {
             font-size: 0.9em;
             opacity: 0.8;
             color: #00ff00;
         }
-
         #target-date {
             margin-top: 20px;
             font-size: 1.2em;
@@ -92,14 +83,12 @@
             color: #00ffff;
             text-shadow: 0 0 5px #00ffff;
         }
-
         .charts-section {
             margin-top: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .chart-container {
             margin: 20px 0;
             width: 100%;
@@ -110,14 +99,12 @@
             border-radius: 10px;
             border: 2px solid #ff00ff;
         }
-
         .chart-title {
             font-size: 1.3em;
             color: #ff00ff;
             margin-bottom: 10px;
             text-shadow: 0 0 10px #ff00ff;
         }
-
         .progress-bar {
             width: 100%;
             height: 25px;
@@ -127,7 +114,6 @@
             margin: 15px 0;
             border: 2px dashed #00ff00;
         }
-
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #ff00ff, #00ff00);
@@ -135,14 +121,12 @@
             transition: width 1s ease;
             box-shadow: 0 0 10px #00ff00;
         }
-
         #percentage-text {
             font-size: 1.2em;
             color: #00ffff;
             font-weight: bold;
             text-shadow: 0 0 10px #00ffff;
         }
-
         #adjusted-countdown {
             font-size: 1.3em;
             color: #00ff00;
@@ -150,48 +134,20 @@
             text-shadow: 0 0 10px #00ff00;
             animation: neonGlow 2s infinite alternate;
         }
-
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
-
         @keyframes neonBlink {
-            0% {
-                color: #ff00ff;
-                text-shadow: 0 0 15px #ff00ff;
-            }
-
-            50% {
-                color: #00ff00;
-                text-shadow: 0 0 15px #00ff00;
-            }
-
-            100% {
-                color: #ff00ff;
-                text-shadow: 0 0 15px #ff00ff;
-            }
+            0% { color: #ff00ff; text-shadow: 0 0 15px #ff00ff; }
+            50% { color: #00ff00; text-shadow: 0 0 15px #00ff00; }
+            100% { color: #ff00ff; text-shadow: 0 0 15px #ff00ff; }
         }
-
         @keyframes neonGlow {
-            0% {
-                text-shadow: 0 0 10px #00ff00;
-            }
-
-            100% {
-                text-shadow: 0 0 20px #00ff00, 0 0 30px #ff00ff;
-            }
+            0% { text-shadow: 0 0 10px #00ff00; }
+            100% { text-shadow: 0 0 20px #00ff00, 0 0 30px #ff00ff; }
         }
-
         .calendar-section {
             margin-top: 20px;
             padding: 15px;
@@ -201,7 +157,6 @@
             box-shadow: 0 0 20px #00ff00;
             animation: calendarPulse 3s infinite;
         }
-
         .calendar-title {
             font-size: 1.5em;
             color: #ff00ff;
@@ -209,14 +164,12 @@
             text-shadow: 0 0 15px #ff00ff;
             animation: neonBlink 2s infinite alternate;
         }
-
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 5px;
             justify-content: center;
         }
-
         .calendar-day {
             padding: 8px;
             border: 1px solid #00ffff;
@@ -227,130 +180,89 @@
             overflow: hidden;
             transition: all 0.3s;
         }
-
-            .calendar-day:hover {
-                transform: scale(1.2);
-                background: rgba(255, 0, 255, 0.3);
-                box-shadow: 0 0 15px #ff00ff;
-            }
-
-            .calendar-day.past {
-                color: #666;
-                opacity: 0.7;
-                background: rgba(255, 0, 0, 0.1);
-            }
-
-                .calendar-day.past::after {
-                    content: "X";
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    color: #ff0000 !important;
-                    font-size: 2em;
-                    font-weight: bold;
-                    text-shadow: 0 0 15px #ff0000;
-                    animation: crossFade 1s infinite;
-                }
-
-            .calendar-day.current {
-                background: linear-gradient(45deg, #ff00ff, #00ff00);
-                color: #000;
-                font-weight: bold;
-                text-shadow: 0 0 5px #fff;
-                animation: pulse 1.5s infinite;
-            }
-
-                .calendar-day.current::before {
-                    content: "⭐";
-                    position: absolute;
-                    top: -5px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    color: #ffff00;
-                    animation: starTwinkle 2s infinite;
-                }
-
+        .calendar-day:hover {
+            transform: scale(1.2);
+            background: rgba(255, 0, 255, 0.3);
+            box-shadow: 0 0 15px #ff00ff;
+        }
+        .calendar-day.past {
+            color: #666;
+            opacity: 0.7;
+            background: rgba(255, 0, 0, 0.1);
+        }
+        .calendar-day.past::after {
+            content: "X";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000 !important;
+            font-size: 2em;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ff0000;
+            animation: crossFade 1s infinite;
+        }
+        .calendar-day.current {
+            background: linear-gradient(45deg, #ff00ff, #00ff00);
+            color: #000;
+            font-weight: bold;
+            text-shadow: 0 0 5px #fff;
+            animation: pulse 1.5s infinite;
+        }
+        .calendar-day.current::before {
+            content: "⭐";
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffff00;
+            animation: starTwinkle 2s infinite;
+        }
         @keyframes calendarPulse {
-            0% {
-                box-shadow: 0 0 20px #00ff00;
-            }
-
-            50% {
-                box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ff00;
-            }
-
-            100% {
-                box-shadow: 0 0 20px #00ff00;
-            }
+            0% { box-shadow: 0 0 20px #00ff00; }
+            50% { box-shadow: 0 0 30px #ff00ff, 0 0 40px #00ff00; }
+            100% { box-shadow: 0 0 20px #00ff00; }
         }
-
         @keyframes crossFade {
-            0% {
-                opacity: 0.7;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0.7;
-            }
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
         }
-
         @keyframes starTwinkle {
-            0% {
-                opacity: 0.5;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0.5;
-            }
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
-
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
                 margin-top: 5px;
                 max-width: 100%;
             }
-
             h1 {
                 font-size: 1.8em;
             }
-
             .time-value {
                 font-size: 1.8em;
             }
-
             .chart-container {
                 height: 200px;
                 max-width: 100%;
             }
-
             .countdown {
                 font-size: 1.2em;
             }
-
             .time-unit {
                 min-width: 60px;
                 flex: 1 1 60px;
             }
-
             .calendar-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
-
             .calendar-day {
                 font-size: 0.9em;
                 padding: 5px;
             }
-
             .calendar-title {
                 font-size: 1.2em;
             }
@@ -405,7 +317,7 @@
         </div>
     </div>
     <script>
-        // Анимация летающих иконок (Tesla и SpaceX/Starship)
+        // Анимация летающих смайликов (🏎️ для Tesla, 🪐 для Starship)
         const canvas = document.getElementById('vehicle-canvas');
         let canvasSupported = true;
         if (!canvas || !canvas.getContext) {
@@ -417,26 +329,25 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             const vehicles = [];
-            // Внешние SVG-логотипы
-            const teslaIcon = new Image();
-            teslaIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/2/21/Tesla_logo.svg'; // Логотип Tesla
-            const spacexIcon = new Image();
-            spacexIcon.src = 'https://upload.wikimedia.org/wikipedia/commons/8/85/SpaceX-Logo.svg'; // Логотип SpaceX (для Starship)
-
             class Vehicle {
-                constructor(icon, speed, size) {
+                constructor(symbol, speed, size, color) {
                     this.x = Math.random() * canvas.width;
                     this.y = Math.random() * canvas.height;
                     this.dx = (Math.random() - 0.5) * speed;
                     this.dy = (Math.random() - 0.5) * speed;
-                    this.icon = icon;
+                    this.symbol = symbol;
                     this.size = size;
+                    this.color = color;
                     this.opacity = Math.random() * 0.5 + 0.5;
                 }
                 draw() {
                     ctx.save();
                     ctx.globalAlpha = this.opacity;
-                    ctx.drawImage(this.icon, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+                    ctx.fillStyle = this.color;
+                    ctx.font = `${this.size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this.symbol, this.x, this.y);
                     ctx.restore();
                 }
                 update() {
@@ -448,21 +359,10 @@
                 }
             }
             function initVehicles() {
-                let iconsLoaded = 0;
-                function checkIcons() {
-                    iconsLoaded++;
-                    if (iconsLoaded === 2) {
-                        for (let i = 0; i < 15; i++) {
-                            vehicles.push(new Vehicle(teslaIcon, 0.5, 50)); // Tesla
-                            vehicles.push(new Vehicle(spacexIcon, 0.3, 60)); // SpaceX/Starship
-                        }
-                        animateCanvas();
-                    }
+                for (let i = 0; i < 15; i++) {
+                    vehicles.push(new Vehicle('🏎️', 0.5, 50, '#ff4500')); // Спортивная машина (оранжевая для Tesla)
+                    vehicles.push(new Vehicle('🪐', 0.3, 60, '#00ced1')); // Планета с кольцами (бирюзовая для Starship)
                 }
-                teslaIcon.onload = checkIcons;
-                spacexIcon.onload = checkIcons;
-                teslaIcon.onerror = () => console.log('Ошибка загрузки Tesla иконки');
-                spacexIcon.onerror = () => console.log('Ошибка загрузки SpaceX иконки');
             }
             function animateCanvas() {
                 requestAnimationFrame(animateCanvas);
@@ -474,6 +374,7 @@
                 canvas.height = window.innerHeight;
             });
             initVehicles();
+            animateCanvas();
         }
         // Обратный отсчёт и графики
         const targetDate = new Date("November 26, 2025 09:00:00").getTime();
@@ -614,7 +515,7 @@
             }
         }
         // Инициализация при загрузке
-        window.onload = function () {
+        window.onload = function() {
             generateCalendar();
             updateCountdown();
             const interval = setInterval(updateCountdown, 1000);
