@@ -28,6 +28,7 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
+            display: none; /* Скрываем старый canvas, так как используем p5.js */
         }
         .container {
             max-width: 600px;
@@ -40,6 +41,14 @@
             box-shadow: 0 0 30px #00ff00, 0 0 20px #ff00ff;
             width: 90%;
             margin-top: 10px;
+        }
+        .version {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.7em;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
         }
         h1 {
             font-size: 2.5em;
@@ -268,11 +277,12 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <canvas id="vehicle-canvas"></canvas>
     <div class="container">
+        <div class="version">v1.0</div>
         <h1>🚀 До твоего Tesla осталось...</h1>
         <div class="countdown">
             <div class="time-unit">
@@ -292,7 +302,7 @@
                 <div class="time-label">Секунд</div>
             </div>
         </div>
-        <p id="target-date">Целевая дата: 26 ноября 2025 9:00  v.beta-001s</p>
+        <p id="target-date">Целевая дата: 26 ноября 2025 9:00</p>
         <div>
             <div class="chart-title">Процент времени, которое уже прошло</div>
             <div class="progress-bar">
@@ -317,65 +327,159 @@
         </div>
     </div>
     <script>
-        // Анимация летающих смайликов (🏎️ для Tesla, 🪐 для Starship)
-        const canvas = document.getElementById('vehicle-canvas');
-        let canvasSupported = true;
-        if (!canvas || !canvas.getContext) {
-            console.log('Canvas не поддерживается или не найден');
-            canvasSupported = false;
+        let particles = [];
+        let collisionSound;
+        let backgroundAudio;
+
+        // Уникальные смайлики без дубликатов
+        const symbols = [
+            '🏎️', '🪐', '🦖', '👽', '🐉', '🌕', '🚀', '🦕', '🌌', '🧙',
+            '🌠', '🦎', '👾', '🗡️', '🌍', '🛸', '🦘', '⚡', '🌞', '🐍',
+            '💫', '🌋', '🦜', '🌴', '🌈', '🪨', '💎', '🌸', '🐳', '🌊',
+            '🕒', '🎆', '🍃', '🔥', '🌟', '🐞', '🌹', '🦋', '❄️'
+        ];
+
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.style('position', 'absolute');
+            canvas.style('top', '0');
+            canvas.style('left', '0');
+            canvas.style('z-index', '0');
+            canvas.style('pointer-events', 'none');
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle());
+            }
+
+            // Инициализация звука столкновения через Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            collisionSound = audioContext.createOscillator();
+            collisionSound.type = 'sine';
+            collisionSound.frequency.setValueAtTime(400, audioContext.currentTime);
+            const collisionGain = audioContext.createGain();
+            collisionGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            collisionSound.connect(collisionGain);
+            collisionGain.connect(audioContext.destination);
+            collisionSound.start();
+            collisionSound.stop(audioContext.currentTime); // Останавливаем сразу, чтобы подготовить
+
+            // Фоновый звук (космическая атмосфера)
+            backgroundAudio = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+            backgroundAudio.loop = true;
+            backgroundAudio.volume = 0.2;
+            backgroundAudio.play().catch(error => console.log("Автовоспроизведение заблокировано:", error));
         }
-        const ctx = canvasSupported ? canvas.getContext('2d') : null;
-        if (canvasSupported) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const vehicles = [];
-            class Vehicle {
-                constructor(symbol, speed, size, color) {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.dx = (Math.random() - 0.5) * speed;
-                    this.dy = (Math.random() - 0.5) * speed;
-                    this.symbol = symbol;
-                    this.size = size;
-                    this.color = color;
-                    this.opacity = Math.random() * 0.5 + 0.5;
-                }
-                draw() {
-                    ctx.save();
-                    ctx.globalAlpha = this.opacity;
-                    ctx.fillStyle = this.color;
-                    ctx.font = `${this.size}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(this.symbol, this.x, this.y);
-                    ctx.restore();
-                }
-                update() {
-                    this.x += this.dx;
-                    this.y += this.dy;
-                    if (this.x > canvas.width || this.x < 0) this.dx = -this.dx;
-                    if (this.y > canvas.height || this.y < 0) this.dy = -this.dy;
-                    this.draw();
+
+        function draw() {
+            background(0, 0, 26); // Полупрозрачный фон для эффекта следа
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].show();
+                for (let j = i + 1; j < particles.length; j++) {
+                    particles[i].checkCollision(particles[j]);
+                    particles[i].applyGravity(particles[j]);
                 }
             }
-            function initVehicles() {
-                for (let i = 0; i < 15; i++) {
-                    vehicles.push(new Vehicle('🏎️', 0.5, 50, '#ff4500')); // Спортивная машина (оранжевая для Tesla)
-                    vehicles.push(new Vehicle('🪐', 0.3, 60, '#00ced1')); // Планета с кольцами (бирюзовая для Starship)
-                }
-            }
-            function animateCanvas() {
-                requestAnimationFrame(animateCanvas);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                vehicles.forEach(vehicle => vehicle.update());
-            }
-            window.addEventListener('resize', () => {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            });
-            initVehicles();
-            animateCanvas();
         }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        class Particle {
+            constructor() {
+                this.x = random(0, width); // Полная ширина экрана
+                this.y = random(0, height); // Полная высота экрана
+                this.dx = random(-2, 2);
+                this.dy = random(-2, 2);
+                this.size = random(30, 60);
+                this.symbol = random(symbols); // Используем уникальные символы
+                this.color = color(random(100, 255), random(100, 255), random(100, 255));
+                this.mass = this.size;
+                this.radius = this.size / 2;
+            }
+
+            update() {
+                if (this.x - this.radius < 0 || this.x + this.radius > width) {
+                    this.dx = -this.dx * 0.7;
+                    this.x = constrain(this.x, this.radius, width - this.radius);
+                }
+                if (this.y - this.radius < 0 || this.y + this.radius > height) {
+                    this.dy = -this.dy * 0.7;
+                    this.y = constrain(this.y, this.radius, height - this.radius);
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+            }
+
+            show() {
+                fill(this.color);
+                textSize(this.size);
+                textAlign(CENTER, CENTER);
+                text(this.symbol, this.x, this.y);
+            }
+
+            applyGravity(other) {
+                const dx = other.x - this.x;
+                const dy = other.y - this.y;
+                const distance = max(dist(this.x, this.y, other.x, other.y), 10);
+                const G = 0.00001;
+                const force = (G * this.mass * other.mass) / (distance * distance);
+                const angle = atan2(dy, dx);
+
+                const accelX = (force * cos(angle)) / this.mass;
+                const accelY = (force * sin(angle)) / this.mass;
+                this.dx += accelX;
+                this.dy += accelY;
+            }
+
+            checkCollision(other) {
+                const dx = other.x - this.x;
+                const dy = other.y - this.y;
+                const distance = dist(this.x, this.y, other.x, other.y);
+                const minDistance = this.radius + other.radius;
+
+                if (distance < minDistance) {
+                    const angle = atan2(dy, dx);
+                    const overlap = minDistance - distance;
+                    this.x -= cos(angle) * overlap * 0.5;
+                    this.y -= sin(angle) * overlap * 0.5;
+                    other.x += cos(angle) * overlap * 0.5;
+                    other.y += sin(angle) * overlap * 0.5;
+
+                    const totalMass = this.mass + other.mass;
+                    const thisMassFactor = this.mass / totalMass;
+                    const otherMassFactor = other.mass / totalMass;
+
+                    const tempDx = this.dx;
+                    const tempDy = this.dy;
+                    this.dx = other.dx * otherMassFactor - tempDx * thisMassFactor;
+                    this.dy = other.dy * otherMassFactor - tempDy * thisMassFactor;
+                    other.dx = tempDx * thisMassFactor - other.dx * otherMassFactor;
+                    other.dy = tempDy * thisMassFactor - other.dy * otherMassFactor;
+
+                    this.dx *= 1.1;
+                    this.dy *= 1.1;
+                    other.dx *= 1.1;
+                    other.dy *= 1.1;
+
+                    // Воспроизведение звука столкновения
+                    if (collisionSound.context.state !== 'running') {
+                        collisionSound = collisionSound.context.createOscillator();
+                        collisionSound.type = 'sine';
+                        collisionSound.frequency.setValueAtTime(random(300, 500), collisionSound.context.currentTime);
+                        const gainNode = collisionSound.context.createGain();
+                        gainNode.gain.setValueAtTime(0.1, collisionSound.context.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, collisionSound.context.currentTime + 0.2);
+                        collisionSound.connect(gainNode);
+                        gainNode.connect(collisionSound.context.destination);
+                        collisionSound.start();
+                        collisionSound.stop(collisionSound.context.currentTime + 0.2);
+                    }
+                }
+            }
+        }
+
         // Обратный отсчёт и графики
         const targetDate = new Date("November 26, 2025 09:00:00").getTime();
         const startDate = new Date("November 11, 2025 09:00:00").getTime();
@@ -389,6 +493,7 @@
         const progressFill = document.getElementById('progress-fill');
         const percentageText = document.getElementById('percentage-text');
         const adjustedCountdown = document.getElementById('adjusted-countdown');
+
         // Chart.js: Выходные дни (пятница и суббота)
         const weekendCtx = document.getElementById('weekend-chart').getContext('2d');
         const weekendChart = new Chart(weekendCtx, {
@@ -418,6 +523,7 @@
                 plugins: { legend: { display: false } }
             }
         });
+
         // Chart.js: Волны ускорения времени (15 дней)
         const timeWaveCtx = document.getElementById('time-wave-chart').getContext('2d');
         const totalDays = 15;
@@ -444,6 +550,7 @@
                 plugins: { legend: { display: false } }
             }
         });
+
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
@@ -496,6 +603,7 @@
             waveData.shift();
             waveData.push(1 + Math.sin(now / 1000000) * 0.3 + Math.random() * 0.1);
         }
+
         // Генерация календаря
         function generateCalendar() {
             const calendarGrid = document.getElementById('calendar-grid');
@@ -514,6 +622,7 @@
                 calendarGrid.appendChild(dayElement);
             }
         }
+
         // Инициализация при загрузке
         window.onload = function() {
             generateCalendar();
@@ -523,4 +632,3 @@
     </script>
 </body>
 </html>
-
