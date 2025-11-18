@@ -6,101 +6,81 @@
     <title>До Tesla осталось...</title>
     <style>
         :root {
-            /* Эти переменные будут переопределяться каждый день */
-            --color-primary: #ff00ff;
-            --color-secondary: #00ff00;
-            --color-accent: #00ffff;
-            --color-bg1: #0d001a;
-            --color-bg2: #1a0033;
-            --emoji-daily: 🌟;
-            --title-glow: #ff00ff;
+            --pri: #ff00ff;     /* основной неон */
+            --sec: #00ff00;     /* второй цвет */
+            --acc: #00ffff;     /* акцент */
+            --bg1: #0a001a;
+            --bg2: #1a0033;
+            --emoji: 🌟;
+            --glow: #ff00ff;
         }
+        body { margin:0; font-family:'Orbitron',sans-serif; background:linear-gradient(135deg,var(--bg1),var(--bg2)); color:#fff; min-height:100vh; overflow-x:hidden; }
+        .container { max-width:600px; margin:20px auto; padding:20px; border:3px dashed var(--pri); border-radius:20px; background:rgba(0,0,0,0.85); box-shadow:0 0 50px var(--pri),0 0 70px var(--sec); position:relative; z-index:2; }
+        h1 { font-size:2.6em; text-align:center; text-shadow:0 0 20px var(--glow),0 0 40px var(--pri); animation:titlePulse 4s infinite; margin:10px 0 20px; }
+        .countdown { display:flex; justify-content:space-around; flex-wrap:wrap; background:linear-gradient(45deg,#000,var(--bg2)); padding:15px; border-radius:15px; animation:countdownPulse 3s infinite; }
+        .time-unit { text-align:center; padding:12px; min-width:80px; background:rgba(255,255,255,0.05); border-radius:12px; border:2px solid var(--acc); box-shadow:0 0 20px var(--pri); animation:unitGlow 2s infinite; }
+        .time-value { font-size:2.8em; font-weight:bold; color:var(--pri); text-shadow:0 0 15px currentColor; }
+        .time-value.update { animation:valuePop 0.4s ease-out; }
+        #total-hours-counter { font-size:1.6em; text-align:center; margin:20px 0; color:var(--sec); text-shadow:0 0 20px var(--sec),0 0 30px var(--pri); animation:totalHoursGlow 2.5s infinite; }
+        #total-hours-counter.update { animation:totalHoursFlash 0.6s; }
 
-        body {
-            margin: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, var(--color-bg1), var(--color-bg2));
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+        .progress-bar { height:30px; background:#111; border-radius:15px; overflow:hidden; border:2px dashed var(--acc); margin:20px 0; }
+        .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--pri),var(--sec)); transition:width 1s ease; box-shadow:0 0 20px var(--pri); }
+        #percentage-text { font-size:1.5em; text-align:center; color:var(--acc); text-shadow:0 0 15px var(--acc); }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 3px dashed var(--color-primary);
-            border-radius: 20px;
-            background: rgba(0,0,0,0.8);
-            box-shadow: 0 0 40px var(--color-primary), 0 0 60px var(--color-secondary);
-            position: relative;
-            z-index: 2;
-        }
+        .calendar-section { margin-top:30px; padding:20px; background:linear-gradient(45deg,var(--bg1),var(--bg2)); border:3px dashed var(--pri); border-radius:20px; animation:cosmicGlow 3.5s infinite; }
+        .calendar-title { font-size:1.6em; text-align:center; margin-bottom:15px; color:var(--pri); text-shadow:0 0 20px var(--pri); animation:neonBlink 2s infinite alternate; }
+        .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(32px,1fr)); gap:4px; }
+        .calendar-day { padding:8px; border:2px solid var(--acc); border-radius:50%; background:rgba(0,255,0,0.15); text-align:center; position:relative; overflow:hidden; animation:fadeIn 0.6s forwards; }
+        .calendar-day::after { content:var(--emoji); }
+        .calendar-day.past { background:rgba(255,0,0,0.3); animation:pastTwinkle 2s infinite; }
+        .calendar-day.past::after { content:"X"; color:#ff0066; font-size:2em; animation:dissolve 1.8s infinite; }
+        .calendar-day.current { background:linear-gradient(45deg,var(--pri),var(--sec),#fff); color:#000; animation:currentFlash 1.5s infinite; }
+        .calendar-day.current::before { content:"Comet"; position:absolute; top:-10px; left:50%; transform:translateX(-50%); animation:cometTrail 1.8s infinite; }
+        .calendar-day:not(.past):not(.current) { animation:futureTwinkle 2s infinite; }
+        .calendar-day.empty { visibility:hidden; }
 
-        h1 {
-            font-size: 2.5em;
-            text-align: center;
-            text-shadow: 0 0 20px var(--title-glow), 0 0 40px var(--color-primary);
-            animation: titlePulse 4s infinite;
-        }
+        /* Темы на каждый день (11–26 ноября = 16 дней) */
+        .daily-0 {--pri:#ff00ff;--sec:#00ffff;--acc:#ff00ff;--bg1:#0a001a;--bg2:#1a0033;--emoji:🌟;--glow:#ff00ff;}
+        .daily-1 {--pri:#00ff00;--sec:#ffff00;--acc:#00ff00;--bg1:#001a00;--bg2:#003300;--emoji:🚀;--glow:#00ff00;}
+        .daily-2 {--pri:#00ffff;--sec:#0088ff;--acc:#00ffff;--bg1:#001a1a;--bg2:#003333;--emoji:🌙;--glow:#00ffff;}
+        .daily-3 {--pri:#ff6600;--sec:#ffff00;--acc:#ff0066;--bg1:#1a0a00;--bg2:#331a00;--emoji:🪐;--glow:#ff6600;}
+        .daily-4 {--pri:#ff0066;--sec:#ff00ff;--acc:#ffff00;--bg1:#1a000d;--bg2:#33001a;--emoji:🦖;--glow:#ff0066;}
+        .daily-5 {--pri:#aa00ff;--sec:#00ffaa;--acc:#ffffff;--bg1:#0f001a;--bg2:#1a0033;--emoji:👽;--glow:#aa00ff;}
+        .daily-6 {--pri:#ffff00;--sec:#ff6600;--acc:#00ff00;--bg1:#1a1a00;--bg2:#333300;--emoji:⚡️;--glow:#ffff00;}
+        .daily-7 {--pri:#00ffaa;--sec:#0088ff;--acc:#ff00ff;--bg1:#001a0f;--bg2:#00331a;--emoji:🌌;--glow:#00ffaa;}
+        .daily-8 {--pri:#ff3366;--sec:#66ff33;--acc:#33ffff;--bg1:#1a0005;--bg2:#001a05;--emoji:🦕;--glow:#ff3366;}
+        .daily-9 {--pri:#cc00ff;--sec:#00ccff;--acc:#ffff33;--bg1:#0f001a;--bg2:#1a0f33;--emoji:🌠;--glow:#cc00ff;}
+        /* ещё можно до daily-15 */
 
-        .countdown { 
-            display: flex; justify-content: space-around; flex-wrap: wrap; 
-            background: linear-gradient(45deg, #000, var(--color-bg2));
-            padding: 15px; border-radius: 15px;
-            animation: countdownGlow 3s infinite;
-        }
-        .time-unit {
-            text-align: center; padding: 12px; min-width: 80px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            border: 2px solid var(--color-accent);
-            box-shadow: 0 0 20px var(--color-primary);
-        }
-        .time-value {
-            font-size: 2.8em; font-weight: bold;
-            color: var(--color-primary);
-            text-shadow: 0 0 15px currentColor;
-        }
+        @keyframes titlePulse {0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+        @keyframes countdownPulse {0%,100%{box-shadow:0 0 30px var(--pri)}50%{box-shadow:0 0 60px var(--sec)}}
+        @keyframes unitGlow {0%,100%{box-shadow:0 0 10px var(--pri)}50%{box-shadow:0 0 25px var(--sec)}}
+        @keyframes valuePop {0%{transform:scale(1)}50%{transform:scale(1.3);opacity:0.7}100%{transform:scale(1)}}
+        @keyframes totalHoursGlow {0%,100%{text-shadow:0 0 15px var(--sec)}50%{text-shadow:0 0 40px var(--pri)}}
+        @keyframes totalHoursFlash {0%{filter:brightness(1)}50%{filter:brightness(2)}100%{filter:brightness(1)}}
+        @keyframes cosmicGlow {0%,100%{box-shadow:0 0 30px var(--pri)}50%{box-shadow:0 0 70px var(--sec),0 0 90px var(--acc)}}
+        @keyframes neonBlink {0%{text-shadow:0 0 20px var(--pri)}100%{text-shadow:0 0 40px var(--sec)}}
+        @keyframes fadeIn {0%{opacity:0;transform:scale(0.3)}100%{opacity:1;transform:scale(1)}}
+        @keyframes currentFlash {0%,100%{background:linear-gradient(45deg,var(--pri),var(--sec))}50%{filter:brightness(1.5)}}
+        @keyframes cometTrail {0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+        @keyframes pastTwinkle {0%,100%{opacity:0.8}50%{opacity:1}}
+        @keyframes dissolve {0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+        @keyframes futureTwinkle {0%,100%{opacity:0.7}50%{opacity:1;transform:scale(1.1)}}
 
-        .calendar-day {
-            font-size: 1em;
-            padding: 8px;
-            border: 2px solid var(--color-accent);
-            border-radius: 50%;
-            background: rgba(0,255,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        .calendar-day::after { content: var(--emoji-daily); }
-        .calendar-day.current::before { content: "Comet"; }
-        .calendar-day.past::after { content: "X"; color: #ff0066; }
-
-        /* Ежедневные темы (15 разных стилей) */
-        .theme-0 { --color-primary:#ff00ff; --color-secondary:#00ffff; --color-accent:#ff00ff; --color-bg1:#0a001a; --color-bg2:#1a0033; --emoji-daily: Comet; --title-glow:#ff00ff; }
-        .theme-1 { --color-primary:#00ff00; --color-secondary:#ffff00; --color-accent:#00ff00; --color-bg1:#001a00; --color-bg2:#003300; --emoji-daily: Rocket; --title-glow:#00ff00; }
-        .theme-2 { --color-primary:#00ffff; --color-secondary:#0088ff; --color-accent:#00ffff; --color-bg1:#001a1a; --color-bg2:#003333; --emoji-daily: Crescent Moon; --title-glow:#00ffff; }
-        .theme-3 { --color-primary:#ff6600; --color-secondary:#ffff00; --color-accent:#ff0066; --color-bg1:#1a0a00; --color-bg2:#331a00; --emoji-daily: Saturn; --title-glow:#ff6600; }
-        .theme-4 { --color-primary:#ff0066; --color-secondary:#ff00ff; --color-accent:#ffff00; --color-bg1:#1a000d; --color-bg2:#33001a; --emoji-daily: Dinosaur; --title-glow:#ff0066; }
-        .theme-5 { --color-primary:#aa00ff; --color-secondary:#00ffaa; --color-accent:#ffffff; --color-bg1:#0f001a; --color-bg2:#1a0033; --emoji-daily: Alien; --emoji-daily: Alien; --title-glow:#aa00ff; }
-        .theme-6 { --color-primary:#ffff00; --color-secondary:#ff6600; --color-accent:#00ff00; --color-bg1:#1a1a00; --color-bg2:#333300; --emoji-daily: Lightning; --title-glow:#ffff00; }
-        /* ещё можно добавить до theme-14 */
-
-        @keyframes titlePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        @keyframes countdownGlow { 0%,100% { box-shadow: 0 0 20px var(--color-primary); } 50% { box-shadow: 0 0 50px var(--color-secondary); } }
-
-        @media (max-width: 600px) {
-            .calendar-grid { grid-template-columns: repeat(7, minmax(32px,1fr)); gap: 3px; }
-            .calendar-day { font-size: 0.75em; padding: 4px; }
-            h1 { font-size: 1.9em; }
+        @media (max-width:600px){
+            .calendar-grid{gap:3px;}
+            .calendar-day{font-size:0.75em;padding:5px;}
+            h1{font-size:2em;}
+            .time-value{font-size:2.2em;}
         }
     </style>
 </head>
 <body>
 
-<div class="container" id="container">
-    <div class="version">v2.0 Daily Cosmic Edition</div>
-    <h1 id="main-title">До твоего Tesla осталось...</h1>
+<div class="container">
+    <div class="version">v2.1 Daily Cosmic Edition</div>
+    <h1 id="title">До твоего Tesla осталось...</h1>
 
     <div class="countdown">
         <div class="time-unit"><div class="time-value" id="days">00</div><div>Дней</div></div>
@@ -112,6 +92,9 @@
     <p id="total-hours-counter">Осталось часов: 0</p>
     <p>Целевая дата: 26 ноября 2025 9:00</p>
 
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div id="percentage-text">0%</div>
+
     <div class="calendar-section">
         <div class="calendar-title">Календарь до Космо-Приключения!</div>
         <div class="calendar-grid" id="calendar-grid"></div>
@@ -119,99 +102,83 @@
 </div>
 
 <script>
-// === 1. Определяем сегодняшний день по израильскому времени ===
-function getIsraelDay() {
-    const now = new Date();
-    const offset = 3; // Israel UTC+3 (летом +3, зимой +2 — но в ноябре 2025 уже +2? пока берём +3)
-    const israel = new Date(now.getTime() + offset * 3600000);
-    return israel.getDate(); // число месяца: 11,12,13…26
-}
+/* ==== 1. Ежедневная тема + перезагрузка в 00:00 по Израилю ==== */
+const israelOffset = 3 * 3600000; // UTC+3 (в ноябре 2025 — стандартное время Израиля)
+const nowIsrael = new Date(Date.now() + israelOffset);
+const todayNum = nowIsrael.getDate(); // 11..26
+const themeIndex = (todayNum - 11) % 16;
+document.documentElement.classList.add(`daily-${themeIndex}`);
 
-// === 2. Выбираем тему дня (0–14, потом повторяется) ===
-const dayNum = getIsraelDay(); // например 14 ноября → 14
-const themeIndex = (dayNum - 11) % 15; // от 0 до 14
-document.documentElement.classList.add(`theme-${themeIndex}`);
-document.getElementById('container').classList.add(`theme-${themeIndex}`);
+// Перезагрузка в 00:00 по Израилю
+const midnight = new Date(nowIsrael);
+midnight.setHours(24,0,0,0);
+setTimeout(() => location.reload(true), midnight - nowIsrael);
 
-// Меняем заголовок в зависимости от темы (по желанию)
-const titles = [
-    "До твоего Tesla осталось...", 
-    "Космос уже близко!", 
-    "Tesla летит к тебе!", 
-    "Ещё чуть-чуть до мечты!", 
-    "Вселенная ждёт тебя и Tesla!"
-];
-document.getElementById('main-title').textContent = titles[themeIndex % titles.length] || titles[0];
-
-// === 3. Принудительная перезагрузка в 00:00 по Израилю ===
-function scheduleMidnightReload() {
-    const now = new Date();
-    const israelNow = new Date(now.getTime() + 3*3600000);
-    const tomorrow = new Date(israelNow);
-    tomorrow.setHours(24,0,0,0); // следующий день 00:00 по Израилю
-
-    const msUntilMidnight = tomorrow - israelNow;
-
-    setTimeout(() => {
-        // Полная перезагрузка страницы с очисткой кэша
-        window.location.reload(true);
-    }, msUntilMidnight);
-}
-scheduleMidnightReload();
-
-// === 4. Остальной код календаря и таймера (без изменений, только эмодзи берём из CSS) ===
+/* ==== 2. Таймер и всё остальное ==== */
 const targetDate = new Date("2025-11-26T09:00:00").getTime();
+const startDate = new Date("2025-11-11T09:00:00").getTime();
+const totalDuration = targetDate - startDate;
 
-function updateCountdown() {
-    const now = new Date().getTime();
-    const distance = targetDate - now;
+const els = {
+    days: document.getElementById('days'),
+    hours: document.getElementById('hours'),
+    minutes: document.getElementById('minutes'),
+    seconds: document.getElementById('seconds'),
+    totalH: document.getElementById('total-hours-counter'),
+    progress: document.getElementById('progress-fill'),
+    percent: document.getElementById('percentage-text')
+};
 
-    if (distance < 0) {
-        document.querySelector('h1').innerHTML = "Tesla уже твоя! КОСМОС ЗОВЁТ!";
-        document.querySelectorAll('.time-value').forEach(el => el.textContent = "00");
+let last = {d:-1,h:-1,m:-1,s:-1,t:-1};
+
+function update() {
+    const now = Date.now();
+    const dist = targetDate - now;
+    if (dist < 0) {
+        document.querySelector('h1').textContent = "Tesla уже твоя! КОСМОС ЗОВЁТ!";
+        ["days","hours","minutes","seconds"].forEach(k=>els[k].textContent="00");
+        els.progress.style.width = "100%";
+        els.percent.textContent = "100%";
         return;
     }
 
-    const days = Math.floor(distance / (1000*60*60*24));
-    const hours = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
-    const minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
-    const seconds = Math.floor((distance % (1000*60)) / 1000);
-    const totalHours = Math.floor(distance / (1000*60*60));
+    const d = Math.floor(dist/(1000*60*60*24));
+    const h = Math.floor((dist%(1000*60*60*24))/(1000*60*60));
+    const m = Math.floor((dist%(1000*60*60))/(1000*60));
+    const s = Math.floor((dist%(1000*60))/1000);
+    const totalH = Math.floor(dist/(1000*60*60));
 
-    document.getElementById('days').textContent = days.toString().padStart(2,'0');
-    document.getElementById('hours').textContent = hours.toString().padStart(2,'0');
-    document.getElementById('minutes').textContent = minutes.toString().padStart(2,'0');
-    document.getElementById('seconds').textContent = seconds.toString().padStart(2,'0');
-    document.getElementById('total-hours-counter').textContent = `Осталось часов: ${totalHours}`;
+    if (d!==last.d) { els.days.textContent = d.toString().padStart(2,'0'); els.days.classList.add('update'); setTimeout(()=>els.days.classList.remove('update'),400); last.d=d; }
+    if (h!==last.h) { els.hours.textContent = h.toString().padStart(2,'0'); els.hours.classList.add('update'); setTimeout(()=>els.hours.classList.remove('update'),400); last.h=h; }
+    if (m!==last.m) { els.minutes.textContent = m.toString().padStart(2,'0'); els.minutes.classList.add('update'); setTimeout(()=>els.minutes.classList.remove('update'),400); last.m=m; }
+    if (s!==last.s) { els.seconds.textContent = s.toString().padStart(2,'0'); els.seconds.classList.add('update'); setTimeout(()=>els.seconds.classList.remove('update'),400); last.s=s; }
+    if (totalH!==last.t) { els.totalH.textContent = `Осталось часов: ${totalH}`; els.totalH.classList.add('update'); setTimeout(()=>els.totalH.classList.remove('update'),600); last.t=totalH; }
+
+    const elapsed = now - startDate;
+    const perc = Math.min(100, (elapsed / totalDuration) * 100);
+    els.progress.style.width = perc.toFixed(3)+"%";
+    els.percent.textContent = perc.toFixed(2)+"%";
 }
-setInterval(updateCountdown, 1000);
-updateCountdown();
+setInterval(update,1000);
+update();
 
-// Генерация календаря (без эмодзи — они теперь в CSS)
+/* ==== 3. Календарь (Израиль: Вс → Сб) ==== */
 function generateCalendar() {
     const grid = document.getElementById('calendar-grid');
     const start = new Date("2025-11-11");
     const end = new Date("2025-11-26");
-    const today = new Date();
-    today.setHours(0,0,0,0);
+    const today = new Date(); today.setHours(0,0,0,0);
 
-    let date = new Date(start);
-    const firstDayOffset = start.getDay(); // 2 = вторник → первые 2 ячейки пустые
+    const firstWeekday = start.getDay(); // 2 = вторник → 2 пустые ячейки перед 11 ноября
+    for(let i=0; i<firstWeekday; i++) grid.innerHTML += `<div class="calendar-day empty"></div>`;
 
-    for (let i = 0; i < firstDayOffset; i++) {
-        grid.innerHTML += `<div class="calendar-day empty"></div>`;
-    }
-
-    while (date <= end) {
-        const dayStr = date.getDate();
-        const isToday = date.toDateString() === today.toDateString();
-        const isPast = date < today;
-
+    for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+        const isToday = d.toDateString() === today.toDateString();
+        const isPast = d < today;
         grid.innerHTML += `
-            <div class="calendar-day ${isPast ? 'past' : ''} ${isToday ? 'current' : ''}">
-                ${dayStr}
+            <div class="calendar-day ${isPast?'past':''} ${isToday?'current':''}">
+                ${d.getDate()}
             </div>`;
-        date.setDate(date.getDate() + 1);
     }
 }
 generateCalendar();
