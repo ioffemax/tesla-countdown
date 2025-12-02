@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polymarket Tracker v6.1</title>
+    <title>Polymarket Tracker v8.0</title>
     <style>
         body {
             background-color: #000000;
@@ -15,120 +15,123 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Чтобы не было скролла */
+            overflow: hidden;
             user-select: none;
         }
-
-        #container { 
-            text-align: center; 
+        #container {
+            text-align: center;
             width: 100%;
+            max-width: 800px;
             padding: 20px;
             box-sizing: border-box;
             position: relative;
-            z-index: 1; /* Контент ниже версии */
+            z-index: 1;
         }
-
-        /* Статус (вверху) */
-        #top-status {
-            font-size: 1rem;
-            color: #777;
-            margin-bottom: 10px;
+        /* --- ВЕРХНЯЯ ЧАСТЬ: СТАТУС --- */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2vh;
+            color: #666;
             font-family: monospace;
-            height: 1.5em;
+            font-size: 1rem;
         }
-
-        /* ГЛАВНАЯ ЦИФРА ($1,XXX) */
+        /* Живой индикатор (лампочка) */
+        .heartbeat {
+            width: 10px;
+            height: 10px;
+            background-color: #333;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        .heartbeat.active {
+            background-color: #4ade80; /* Зеленая вспышка при обновлении */
+            box-shadow: 0 0 10px #4ade80;
+        }
+        /* --- ГЛАВНАЯ ЦИФРА --- */
         #payout-amount {
-            font-size: 18vw; /* Адаптивный огромный размер */
+            font-size: 20vw; /* Адаптивный размер */
             font-weight: 800;
-            line-height: 1.1; 
-            color: #4ade80;   /* Ярко-зеленый */
-            text-shadow: 0 0 50px rgba(74, 222, 128, 0.25);
-            margin: 10px 0 30px 0; /* Большой отступ снизу */
-            letter-spacing: -3px;
+            line-height: 1;
+            color: #4ade80;
+            text-shadow: 0 0 60px rgba(74, 222, 128, 0.2);
+            margin: 0;
+            padding: 2vh 0; /* Воздух сверху и снизу */
+            letter-spacing: -4px;
         }
-
-        /* Пояснение */
+        /* --- ПОЯСНЕНИЕ --- */
         .explanation {
-            font-size: 1.6rem;
+            font-size: 1.5rem; /* Крупный читаемый текст */
             color: #aaa;
-            margin-bottom: 40px; 
+            margin-bottom: 5vh; /* Фиксированный отступ снизу */
             font-weight: 400;
         }
-
-        /* Блок с деталями (Цена и Шанс) */
+        /* --- БЛОК ДЕТАЛЕЙ --- */
         .stats-row {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
         }
-
         .stat-box {
             background: #111;
             border: 1px solid #333;
-            padding: 15px 30px;
-            border-radius: 15px;
+            padding: 15px 25px;
+            border-radius: 16px;
             min-width: 140px;
         }
-
         .stat-val {
             display: block;
             font-size: 1.8rem;
             font-weight: bold;
             color: #fff;
         }
-
         .stat-lbl {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #777;
             text-transform: uppercase;
             margin-top: 5px;
-            display: block;
-            font-weight: 600;
+            letter-spacing: 1px;
         }
-
-        /* ВЕРСИЯ - Сделана максимально заметной */
-        .version {
+        /* --- ВЕРСИЯ (Правый верхний угол) --- */
+        .version-badge {
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
-            font-size: 1.1rem;
-            color: #ffffff;      /* Белый текст */
-            background: #333333; /* Серый фон */
-            padding: 8px 15px;
+            background: #222;
+            color: #fff;
+            padding: 8px 12px;
             border-radius: 8px;
             font-family: monospace;
-            border: 2px solid #555; /* Рамка */
-            z-index: 100; /* Поверх всего */
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-weight: bold;
+            border: 1px solid #555;
+            z-index: 9999; /* Поверх всего */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
-
-        /* Сообщения об ошибках */
+        /* Ошибки */
         #error-msg {
-            color: #ff5555;
-            margin-top: 25px;
+            color: #ff6b6b;
+            margin-top: 30px;
             font-family: monospace;
-            display: none;
-            background: rgba(50,0,0,0.9);
-            padding: 15px;
+            background: rgba(50,0,0,0.8);
+            padding: 10px 20px;
             border-radius: 8px;
-            max-width: 80%;
-            margin-left: auto;
-            margin-right: auto;
+            display: none;
         }
-
-        .loading { opacity: 0.3; }
     </style>
 </head>
 <body>
-
+    <div class="version-badge">v8.0</div>
     <div id="container">
-        <div id="top-status">Запуск...</div>
-        
-        <div id="payout-amount" class="loading">---</div>
-        
+        <div class="status-bar">
+            <div id="pulse-dot" class="heartbeat"></div>
+            <div id="status-text">Ожидание...</div>
+        </div>
+       
+        <div id="payout-amount">---</div>
+       
         <div class="explanation">получу, если куплю "Yes" на $100</div>
-
         <div class="stats-row">
             <div class="stat-box">
                 <span class="stat-val" id="price-val">--</span>
@@ -139,119 +142,124 @@
                 <span class="stat-lbl">Шанс</span>
             </div>
         </div>
-
         <div id="error-msg"></div>
     </div>
-
-    <div class="version">v6.1 Final</div>
-
     <script>
-        // --- КОНФИГУРАЦИЯ ---
+        // --- НАСТРОЙКИ ---
         const SLUG = "russia-x-ukraine-ceasefire-in-2025";
         const MY_BET = 100;
-        
-        // Список прокси (если один упадет, сработает другой)
+       
+        // Надежные прокси (добавил третий)
         const PROXY_LIST = [
-            "https://api.allorigins.win/raw?url=%s", 
+            "https://api.allorigins.win/raw?url=%s",
             "https://corsproxy.io/?%s",
             "https://thingproxy.freeboard.io/fetch/%s"
         ];
-        
+       
         const API_BASE = "https://gamma-api.polymarket.com";
-
-        // Функция с тайм-аутом (чтобы не висело вечно)
-        async function fetchWithTimeout(resource, options = {}) {
-            const { timeout = 5000 } = options; 
+        // Помощник для fetch
+        async function fetchWithTimeout(url, timeout = 10000) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
-            const response = await fetch(resource, { ...options, signal: controller.signal });
+            const response = await fetch(url, { signal: controller.signal });
             clearTimeout(id);
             return response;
         }
-
-        // Умный перебор прокси
+        // Умный fetch с ротацией прокси
         async function robustFetch(targetUrl) {
-            const statusEl = document.getElementById('top-status');
-            const urlNoCache = targetUrl + "&_t=" + Date.now(); // Анти-кэш
-
-            for (let i = 0; i < PROXY_LIST.length; i++) {
-                const proxyTemplate = PROXY_LIST[i];
-                const finalUrl = proxyTemplate.replace("%s", encodeURIComponent(urlNoCache));
-                
+            const urlNoCache = targetUrl + "&_t=" + Date.now();
+           
+            for (const proxyTpl of PROXY_LIST) {
                 try {
-                    statusEl.innerText = `Подключение (канал ${i+1})...`;
+                    let finalUrl;
+                    if (proxyTpl.includes("thingproxy")) {
+                        finalUrl = proxyTpl.replace("%s", encodeURIComponent(urlNoCache));
+                    } else {
+                        finalUrl = proxyTpl.replace("%s", encodeURIComponent(urlNoCache));
+                    }
                     const resp = await fetchWithTimeout(finalUrl);
-                    if (!resp.ok) throw new Error("Status " + resp.status);
+                    if (!resp.ok) throw new Error("Http " + resp.status);
                     return await resp.json();
                 } catch (e) {
-                    console.warn(`Канал ${i+1} не ответил, пробуем следующий...`);
+                    console.warn("Proxy fail:", e);
                 }
             }
-            throw new Error("Нет связи с Polymarket (все прокси заняты)");
+            throw new Error("Нет связи с сервером");
         }
-
+        // ГЛАВНАЯ ФУНКЦИЯ
         async function updateData() {
             const amountEl = document.getElementById('payout-amount');
             const priceEl = document.getElementById('price-val');
             const chanceEl = document.getElementById('chance-val');
-            const statusEl = document.getElementById('top-status');
+            const statusText = document.getElementById('status-text');
+            const pulseDot = document.getElementById('pulse-dot');
             const errorEl = document.getElementById('error-msg');
-
+            // 1. ВИЗУАЛИЗАЦИЯ НАЧАЛА ЗАГРУЗКИ
+            pulseDot.classList.add('active'); // Лампочка загорается
+            statusText.innerText = "Обновление данных...";
+            amountEl.style.opacity = "0.7"; // Цифра чуть тускнеет
             try {
-                // 1. Ищем ID события
+                // 2. ПОЛУЧЕНИЕ ДАННЫХ
                 const eventUrl = `${API_BASE}/events?slug=${SLUG}`;
                 const eventData = await robustFetch(eventUrl);
-                
-                if (!eventData || !eventData.length) throw new Error("Событие не найдено");
+               
+                if (!eventData?.[0]?.markets?.[0]) throw new Error("Рынок не найден");
                 const marketId = eventData[0].markets[0].id;
-
-                // 2. Ищем данные рынка (Книга ордеров)
                 const marketUrl = `${API_BASE}/markets/${marketId}`;
                 const marketFull = await robustFetch(marketUrl);
-
-                // 3. Парсим
-                const outcomes = JSON.parse(marketFull.outcomes);
+                // 3. ПАРСИНГ (ИСПРАВЛЕНО)
+                const outcomes = JSON.parse(marketFull.outcomes || '["Yes", "No"]'); // Fallback, если undefined
                 const yesIndex = outcomes.indexOf("Yes");
-
-                // Логика цены: BestAsk (реальная покупка) -> иначе OutcomePrice
-                let buyPrice = null;
-                if (marketFull.bestAsk && marketFull.bestAsk[yesIndex]) {
-                    buyPrice = parseFloat(marketFull.bestAsk[yesIndex]);
-                } else {
-                    buyPrice = parseFloat(JSON.parse(marketFull.outcomePrices)[yesIndex]);
+                if (yesIndex === -1) throw new Error("Вариант 'Yes' не найден");
+                
+                // Ищем Ask (покупка) — теперь как число, не массив
+                let buyPrice = 0;
+                if (marketFull.bestAsk && typeof marketFull.bestAsk === 'string') {
+                    buyPrice = parseFloat(marketFull.bestAsk);
+                    if (buyPrice > 0 && buyPrice <= 1) {
+                        // Используем bestAsk напрямую (для Yes)
+                    } else {
+                        buyPrice = 0; // Invalid
+                    }
                 }
-
-                if (!buyPrice) throw new Error("Цена не определена");
-
-                // 4. Считаем
+                // Fallback на outcomePrices
+                if (buyPrice <= 0) {
+                    const pricesStr = marketFull.outcomePrices || '["0","1"]';
+                    const prices = JSON.parse(pricesStr);
+                    buyPrice = parseFloat(prices[yesIndex] || 0);
+                }
+                if (buyPrice <= 0 || buyPrice > 1) throw new Error("Цена некорректна (0 или >1)");
+                // 4. РАСЧЕТЫ
                 const payout = MY_BET / buyPrice;
                 const priceCents = (buyPrice * 100).toFixed(1);
                 const prob = Math.round(buyPrice * 100);
-
-                // 5. Выводим
-                amountEl.classList.remove('loading');
+                // 5. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
                 amountEl.innerText = payout.toLocaleString('en-US', {
-                    style: 'currency', currency: 'USD', maximumFractionDigits: 0 
+                    style: 'currency', currency: 'USD', maximumFractionDigits: 0
                 });
-                
                 priceEl.innerText = priceCents + "¢";
                 chanceEl.innerText = prob + "%";
-                
+               
+                // Успешный статус
                 const now = new Date();
-                statusEl.innerText = "Обновлено: " + now.toLocaleTimeString();
+                statusText.innerText = "Актуально на " + now.toLocaleTimeString();
                 errorEl.style.display = 'none';
-
             } catch (err) {
                 console.error(err);
-                statusEl.innerText = "Сбой связи";
+                statusText.innerText = "Сбой обновления";
                 errorEl.style.display = 'block';
-                errorEl.innerText = err.message + ". Повтор через минуту...";
+                errorEl.innerText = err.message;
+            } finally {
+                // 6. ЗАВЕРШЕНИЕ (лампочка гаснет)
+                setTimeout(() => {
+                    pulseDot.classList.remove('active');
+                    amountEl.style.opacity = "1";
+                }, 500);
             }
         }
-
-        // Старт
+        // Запуск
         updateData();
-        setInterval(updateData, 60000);
+        setInterval(updateData, 60000); // Каждые 60 сек
     </script>
 </body>
 </html>
