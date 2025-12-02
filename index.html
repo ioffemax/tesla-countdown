@@ -3,234 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>До Tesla осталось...</title>
+    <title>Polymarket Tracker</title>
     <style>
-        :root {
-            --pri: #ff00ff;     /* основной неон */
-            --sec: #00ff00;     /* второй цвет */
-            --acc: #00ffff;     /* акцент */
-            --bg1: #0a001a;
-            --bg2: #1a0033;
-            --emoji: 🌟;
-            --glow: #ff00ff;
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-        body { margin:0; font-family:'Orbitron',sans-serif; background:linear-gradient(135deg,var(--bg1),var(--bg2)); color:#fff; min-height:100vh; overflow-x:hidden; }
-        .container { max-width:600px; margin:20px auto; padding:20px; border:3px dashed var(--pri); border-radius:20px; background:rgba(0,0,0,0.85); box-shadow:0 0 50px var(--pri),0 0 70px var(--sec); position:relative; z-index:2; }
-        h1 { font-size:2.6em; text-align:center; text-shadow:0 0 20px var(--glow),0 0 40px var(--pri); animation:titlePulse 4s infinite; margin:10px 0 20px; line-height: 1.2; }
+
+        #container {
+            text-align: center;
+        }
+
+        #last-update {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        #payout-amount {
+            font-size: 15vw;
+            font-weight: bold;
+            line-height: 1;
+            color: #4ade80;
+            text-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+            margin: 0;
+            transition: color 0.3s;
+        }
+
+        .sub-text {
+            font-size: 2rem;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        #status {
+            font-size: 1.2rem;
+            color: #ff4444;
+            margin-top: 20px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
         
-        .countdown { display:flex; justify-content:space-around; flex-wrap:wrap; gap: 10px; background:linear-gradient(45deg,#000,var(--bg2)); padding:15px; border-radius:15px; animation:countdownPulse 3s infinite; }
-        .time-unit { text-align:center; padding:10px; flex: 1 1 80px; background:rgba(255,255,255,0.05); border-radius:12px; border:2px solid var(--acc); box-shadow:0 0 20px var(--pri); animation:unitGlow 2s infinite; }
-        .time-value { font-size:2.2em; font-weight:bold; color:var(--pri); text-shadow:0 0 15px currentColor; display: block; }
-        .time-label { font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; }
-        .time-value.update { animation:valuePop 0.4s ease-out; }
-        
-        #total-hours-counter { font-size:1.6em; text-align:center; margin:20px 0; color:var(--sec); text-shadow:0 0 20px var(--sec),0 0 30px var(--pri); animation:totalHoursGlow 2.5s infinite; }
-        #total-hours-counter.update { animation:totalHoursFlash 0.6s; }
-
-        .progress-bar { height:30px; background:#111; border-radius:15px; overflow:hidden; border:2px dashed var(--acc); margin:20px 0; position: relative; }
-        .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--pri),var(--sec)); transition:width 1s ease; box-shadow:0 0 20px var(--pri); }
-        #percentage-text { font-size:1.5em; text-align:center; color:var(--acc); text-shadow:0 0 15px var(--acc); margin-top: 5px; }
-
-        .calendar-section { margin-top:30px; padding:20px; background:linear-gradient(45deg,var(--bg1),var(--bg2)); border:3px dashed var(--pri); border-radius:20px; animation:cosmicGlow 3.5s infinite; }
-        .calendar-title { font-size:1.6em; text-align:center; margin-bottom:15px; color:var(--pri); text-shadow:0 0 20px var(--pri); animation:neonBlink 2s infinite alternate; }
-        .calendar-grid { display:grid; grid-template-columns:repeat(7, 1fr); gap:5px; }
-        .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border:2px solid var(--acc); border-radius:50%; background:rgba(0,255,0,0.15); position:relative; overflow:hidden; animation:fadeIn 0.6s forwards; font-weight: bold; }
-        .calendar-day::after { content:var(--emoji); position: absolute; opacity: 0.3; font-size: 0.8em; bottom: 2px; right: 2px;}
-        .calendar-day.past { background:rgba(255,0,0,0.3); animation:pastTwinkle 2s infinite; opacity: 0.6; }
-        .calendar-day.past::after { content:"X"; color:#ff0066; font-size:1.5em; opacity: 1; animation:dissolve 1.8s infinite; top: 50%; left: 50%; transform: translate(-50%, -50%); bottom: auto; right: auto; }
-        .calendar-day.current { background:linear-gradient(45deg,var(--pri),var(--sec),#fff); color:#000; animation:currentFlash 1.5s infinite; z-index: 10; transform: scale(1.1); box-shadow: 0 0 15px var(--pri); border-color: #fff; }
-        .calendar-day.current::before { content:"Tesla"; position:absolute; top:-15px; font-size: 0.6em; background: #000; color: #fff; padding: 2px 4px; border-radius: 4px; animation:cometTrail 1.8s infinite; }
-        .calendar-day:not(.past):not(.current) { animation:futureTwinkle 2s infinite; }
-        .calendar-day.empty { visibility:hidden; border: none; background: none; }
-
-        /* Темы (0-9) */
-        .daily-0 {--pri:#ff00ff;--sec:#00ffff;--acc:#ff00ff;--bg1:#0a001a;--bg2:#1a0033;--emoji:🌟;--glow:#ff00ff;}
-        .daily-1 {--pri:#00ff00;--sec:#ffff00;--acc:#00ff00;--bg1:#001a00;--bg2:#003300;--emoji:🚀;--glow:#00ff00;}
-        .daily-2 {--pri:#00ffff;--sec:#0088ff;--acc:#00ffff;--bg1:#001a1a;--bg2:#003333;--emoji:🌙;--glow:#00ffff;}
-        .daily-3 {--pri:#ff6600;--sec:#ffff00;--acc:#ff0066;--bg1:#1a0a00;--bg2:#331a00;--emoji:🪐;--glow:#ff6600;}
-        .daily-4 {--pri:#ff0066;--sec:#ff00ff;--acc:#ffff00;--bg1:#1a000d;--bg2:#33001a;--emoji:🦖;--glow:#ff0066;}
-        .daily-5 {--pri:#aa00ff;--sec:#00ffaa;--acc:#ffffff;--bg1:#0f001a;--bg2:#1a0033;--emoji:👽;--glow:#aa00ff;}
-        .daily-6 {--pri:#ffff00;--sec:#ff6600;--acc:#00ff00;--bg1:#1a1a00;--bg2:#333300;--emoji:⚡️;--glow:#ffff00;}
-        .daily-7 {--pri:#00ffaa;--sec:#0088ff;--acc:#ff00ff;--bg1:#001a0f;--bg2:#00331a;--emoji:🌌;--glow:#00ffaa;}
-        .daily-8 {--pri:#ff3366;--sec:#66ff33;--acc:#33ffff;--bg1:#1a0005;--bg2:#001a05;--emoji:🦕;--glow:#ff3366;}
-        .daily-9 {--pri:#cc00ff;--sec:#00ccff;--acc:#ffff33;--bg1:#0f001a;--bg2:#1a0f33;--emoji:🌠;--glow:#cc00ff;}
-
-        @keyframes titlePulse {0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-        @keyframes countdownPulse {0%,100%{box-shadow:0 0 30px var(--pri)}50%{box-shadow:0 0 60px var(--sec)}}
-        @keyframes unitGlow {0%,100%{box-shadow:0 0 10px var(--pri)}50%{box-shadow:0 0 25px var(--sec)}}
-        @keyframes valuePop {0%{transform:scale(1)}50%{transform:scale(1.3);opacity:0.7}100%{transform:scale(1)}}
-        @keyframes totalHoursGlow {0%,100%{text-shadow:0 0 15px var(--sec)}50%{text-shadow:0 0 40px var(--pri)}}
-        @keyframes totalHoursFlash {0%{filter:brightness(1)}50%{filter:brightness(2)}100%{filter:brightness(1)}}
-        @keyframes cosmicGlow {0%,100%{box-shadow:0 0 30px var(--pri)}50%{box-shadow:0 0 70px var(--sec),0 0 90px var(--acc)}}
-        @keyframes neonBlink {0%{text-shadow:0 0 20px var(--pri)}100%{text-shadow:0 0 40px var(--sec)}}
-        @keyframes fadeIn {0%{opacity:0;transform:scale(0.3)}100%{opacity:1;transform:scale(1)}}
-        @keyframes currentFlash {0%,100%{background:linear-gradient(45deg,var(--pri),var(--sec))}50%{filter:brightness(1.5)}}
-        @keyframes cometTrail {0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
-        @keyframes pastTwinkle {0%,100%{opacity:0.8}50%{opacity:1}}
-        @keyframes dissolve {0%,100%{opacity:0.7;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
-        @keyframes futureTwinkle {0%,100%{opacity:0.7}50%{opacity:1;transform:scale(1.1)}}
-
-        @media (max-width:600px){
-            .calendar-grid{gap:3px;}
-            .calendar-day{font-size:0.8em; padding: 2px;}
-            h1{font-size:1.8em;}
-            .time-value{font-size:1.8em;}
-            .container { padding: 10px; width: 90%; }
+        /* Анимация пульсации при обновлении */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .loading {
+            animation: pulse 1.5s infinite;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="version">v2.2 Stable Cosmic Edition</div>
-    <h1 id="title">До твоего Tesla осталось...</h1>
-
-    <div class="countdown">
-        <div class="time-unit"><div class="time-value" id="days">00</div><div class="time-label">Дней</div></div>
-        <div class="time-unit"><div class="time-value" id="hours">00</div><div class="time-label">Часов</div></div>
-        <div class="time-unit"><div class="time-value" id="minutes">00</div><div class="time-label">Минут</div></div>
-        <div class="time-unit"><div class="time-value" id="seconds">00</div><div class="time-label">Секунд</div></div>
+    <div id="container">
+        <div id="last-update">Загрузка...</div>
+        <div id="payout-amount" class="loading">---</div>
+        <div class="sub-text">
+            <span id="probability">--%</span> шанс | Цена: <span id="share-price">--</span>¢
+        </div>
+        <div id="status"></div>
     </div>
 
-    <p id="total-hours-counter">Осталось часов: 0</p>
-    <p style="text-align:center; opacity:0.8">Целевая дата: 26 ноября 2025 9:00</p>
+    <script>
+        // --- КОНФИГУРАЦИЯ ---
+        const SLUG = "russia-x-ukraine-ceasefire-in-2025";
+        const BET_AMOUNT = 100; // Ваши $100
 
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-    <div id="percentage-text">0%</div>
+        // Используем публичный прокси для обхода CORS (блокировки браузера)
+        // Если этот перестанет работать, можно попробовать 'https://api.allorigins.win/raw?url='
+        const CORS_PROXY = "https://corsproxy.io/?"; 
+        const API_URL = `https://gamma-api.polymarket.com/events?slug=${SLUG}`;
 
-    <div class="calendar-section">
-        <div class="calendar-title">Календарь до Космо-Приключения!</div>
-        <div class="calendar-grid" id="calendar-grid"></div>
-    </div>
-</div>
+        async function fetchData() {
+            const statusEl = document.getElementById('status');
+            const updateEl = document.getElementById('last-update');
+            const amountEl = document.getElementById('payout-amount');
 
-<script>
-/* ==== Настройки дат ==== */
-// ТЕКУЩАЯ ЦЕЛЬ: 26 ноября. Если дата перенесется (например, на декабрь), 
-// поменяй дату ниже на '2025-12-15T09:00:00'
-const targetDate = new Date("2025-11-26T09:00:00").getTime();
-const startDate = new Date("2025-11-11T09:00:00").getTime();
+            try {
+                // Запрашиваем через прокси
+                const targetUrl = CORS_PROXY + encodeURIComponent(API_URL);
+                const response = await fetch(targetUrl);
+                
+                if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Проверки структуры данных
+                if (!data || !data.length || !data[0].markets) {
+                    throw new Error("Неверный формат данных от API");
+                }
 
-/* ==== 1. Ежедневная тема + перезагрузка (Fix) ==== */
-function applyDailyTheme() {
-    // Используем разницу во времени, чтобы тема не ломалась при смене месяца
-    const now = new Date();
-    const dayMs = 1000 * 60 * 60 * 24;
-    const daysPassed = Math.floor((now.getTime() - startDate) / dayMs);
-    
-    // Берем модуль 10, так как в CSS определены только .daily-0 ... .daily-9
-    // Math.max(0, ...) защищает от отрицательных значений до начала старта
-    const themeIndex = Math.max(0, daysPassed) % 10; 
-    document.documentElement.className = `daily-${themeIndex}`;
+                // Ищем нужный рынок
+                const market = data[0].markets[0];
+                const outcomeIndex = JSON.parse(market.outcomes).indexOf("Yes");
+                
+                if (outcomeIndex === -1) throw new Error("Исход 'Yes' не найден");
 
-    // Логика перезагрузки в полночь (Израиль UTC+2/UTC+3)
-    // Просто берем локальное время браузера пользователя для простоты
-    const midnight = new Date();
-    midnight.setHours(24,0,0,0);
-    const msToMidnight = midnight.getTime() - now.getTime();
-    setTimeout(() => location.reload(true), msToMidnight + 1000);
-}
-applyDailyTheme();
+                // Получаем цену (берем bestAsk если есть, иначе последнюю сделку)
+                // bestAsk - это реальная цена покупки прямо сейчас
+                let priceStr = market.bestAsk || JSON.parse(market.outcomePrices)[outcomeIndex];
+                let price = parseFloat(priceStr);
 
-/* ==== 2. Таймер ==== */
-const els = {
-    days: document.getElementById('days'),
-    hours: document.getElementById('hours'),
-    minutes: document.getElementById('minutes'),
-    seconds: document.getElementById('seconds'),
-    totalH: document.getElementById('total-hours-counter'),
-    progress: document.getElementById('progress-fill'),
-    percent: document.getElementById('percentage-text'),
-    title: document.getElementById('title')
-};
+                if (!price || price <= 0) throw new Error("Цена не определена");
 
-const totalDuration = targetDate - startDate;
-let last = {d:-1,h:-1,m:-1,s:-1,t:-1};
+                // --- РАСЧЕТЫ ---
+                const priceInCents = (price * 100).toFixed(1);
+                const probability = Math.round(price * 100);
+                
+                // Формула: (Мои $100 / цена покупки) * $1 выплаты
+                const totalPayout = BET_AMOUNT / price;
 
-function update() {
-    const now = Date.now();
-    const dist = targetDate - now;
-    
-    if (dist < 0) {
-        els.title.textContent = "Tesla уже твоя! КОСМОС ЗОВЁТ!";
-        ["days","hours","minutes","seconds"].forEach(k=>els[k].textContent="00");
-        els.progress.style.width = "100%";
-        els.percent.textContent = "100%";
-        // Останавливаем таймер чтобы не грузить процессор
-        return; 
-    }
+                // --- ВЫВОД ---
+                amountEl.innerText = totalPayout.toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    maximumFractionDigits: 0
+                });
+                
+                document.getElementById('probability').innerText = probability + "%";
+                document.getElementById('share-price').innerText = priceInCents;
 
-    const d = Math.floor(dist/(1000*60*60*24));
-    const h = Math.floor((dist%(1000*60*60*24))/(1000*60*60));
-    const m = Math.floor((dist%(1000*60*60))/(1000*60));
-    const s = Math.floor((dist%(1000*60))/1000);
-    const totalH = Math.floor(dist/(1000*60*60));
+                // Обновляем время
+                const now = new Date();
+                updateEl.innerText = "Обновлено: " + now.toLocaleTimeString();
+                
+                // Сброс ошибок и анимации
+                statusEl.innerText = "";
+                amountEl.classList.remove('loading');
+                amountEl.style.color = "#4ade80"; // Зеленый
 
-    if (d!==last.d) { els.days.textContent = d.toString().padStart(2,'0'); els.days.classList.add('update'); setTimeout(()=>els.days.classList.remove('update'),400); last.d=d; }
-    if (h!==last.h) { els.hours.textContent = h.toString().padStart(2,'0'); els.hours.classList.add('update'); setTimeout(()=>els.hours.classList.remove('update'),400); last.h=h; }
-    if (m!==last.m) { els.minutes.textContent = m.toString().padStart(2,'0'); els.minutes.classList.add('update'); setTimeout(()=>els.minutes.classList.remove('update'),400); last.m=m; }
-    if (s!==last.s) { els.seconds.textContent = s.toString().padStart(2,'0'); els.seconds.classList.add('update'); setTimeout(()=>els.seconds.classList.remove('update'),400); last.s=s; }
-    
-    if (totalH!==last.t) { 
-        els.totalH.textContent = `Осталось часов: ${totalH}`; 
-        els.totalH.classList.add('update'); 
-        setTimeout(()=>els.totalH.classList.remove('update'),600); 
-        last.t=totalH; 
-    }
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = "Ошибка: " + error.message + ". Проверьте интернет или попробуйте позже.";
+                amountEl.style.color = "#666"; // Серый при ошибке
+                amountEl.classList.remove('loading');
+            }
+        }
 
-    const elapsed = now - startDate;
-    // Защита, чтобы прогресс не ушел в минус или больше 100
-    const perc = Math.max(0, Math.min(100, (elapsed / totalDuration) * 100));
-    els.progress.style.width = perc.toFixed(2)+"%";
-    els.percent.textContent = perc.toFixed(1)+"%";
-}
-setInterval(update,1000);
-update();
-
-/* ==== 3. Календарь (Улучшенная логика) ==== */
-function generateCalendar() {
-    const grid = document.getElementById('calendar-grid');
-    grid.innerHTML = ''; // Очистка
-
-    const start = new Date(startDate);
-    const end = new Date(targetDate);
-    const today = new Date(); today.setHours(0,0,0,0);
-
-    // Определяем день недели начала (0-6), чтобы сдвинуть календарь
-    const startDayOfWeek = start.getDay(); 
-    
-    // Добавляем пустые ячейки в начало
-    for(let i=0; i<startDayOfWeek; i++) {
-        grid.innerHTML += `<div class="calendar-day empty"></div>`;
-    }
-
-    // Цикл по дням от старта до финиша
-    // Создаем копию даты для итерации
-    let currentIter = new Date(start);
-    
-    // Ограничитель цикла на всякий случай (макс 60 дней)
-    let safety = 0;
-    while (currentIter <= end && safety < 60) {
-        // Сравнение дат без времени
-        const iterTime = new Date(currentIter).setHours(0,0,0,0);
-        const todayTime = today.getTime();
-        
-        let className = '';
-        if (iterTime < todayTime) className = 'past';
-        else if (iterTime === todayTime) className = 'current';
-        
-        grid.innerHTML += `
-            <div class="calendar-day ${className}">
-                ${currentIter.getDate()}
-            </div>`;
-        
-        // Следующий день
-        currentIter.setDate(currentIter.getDate() + 1);
-        safety++;
-    }
-}
-generateCalendar();
-
-</script>
+        // Запуск
+        fetchData();
+        setInterval(fetchData, 60000); // Каждую минуту
+    </script>
 </body>
 </html>
