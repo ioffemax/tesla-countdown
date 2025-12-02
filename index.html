@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tesla Fund Tracker</title>
+    <title>Tesla Fund Tracker v3.1</title>
     <style>
         body {
             background-color: #000000;
@@ -16,83 +16,100 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            user-select: none; /* Чтобы красиво смотрелось без выделения текста */
         }
 
         #container { text-align: center; width: 100%; }
 
-        /* Время */
+        /* Время обновления */
         #last-update {
-            font-size: 1.2rem;
-            color: #666;
+            font-size: 1rem;
+            color: #444;
             margin-bottom: 20px;
-            font-weight: 300;
-        }
-
-        /* Главная сумма */
-        #payout-amount {
-            font-size: 18vw; /* Максимально крупно */
-            font-weight: bold;
-            line-height: 1;
-            color: #4ade80; /* Цвет денег */
-            text-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
-            margin: 0;
-            transition: all 0.3s ease;
-        }
-
-        /* Детали */
-        .sub-text {
-            font-size: 2.5rem;
-            color: #888;
-            margin-top: 15px;
-            font-weight: 300;
-        }
-        
-        .sub-details {
-            font-size: 1.2rem;
-            color: #555;
-            margin-top: 5px;
-        }
-
-        /* Ошибки */
-        #status {
-            font-size: 1.2rem;
-            color: #ef4444;
-            margin-top: 30px;
             font-family: monospace;
-            background: #220000;
-            padding: 10px;
-            border-radius: 5px;
+        }
+
+        /* Главная сумма (Выплата) */
+        #payout-amount {
+            font-size: 20vw; /* Адаптивный огромный размер */
+            font-weight: 800;
+            line-height: 0.9;
+            color: #4ade80; /* Зеленый */
+            text-shadow: 0 0 40px rgba(74, 222, 128, 0.15);
+            margin: 0;
+            letter-spacing: -2px;
+        }
+
+        /* Пояснение под цифрой */
+        .explanation {
+            font-size: 1.5rem;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 400;
+        }
+
+        /* Технические детали (шанс и цена) */
+        .stats {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: #444;
+            border: 1px solid #222;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: #0a0a0a;
+        }
+
+        .stats span { color: #888; font-weight: bold; }
+
+        /* Версия */
+        .version {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.8rem;
+            color: #333;
+            font-family: monospace;
+        }
+
+        /* Статус ошибок */
+        #status {
+            font-size: 1rem;
+            color: #ef4444;
+            margin-top: 20px;
             display: none; 
         }
 
         /* Анимация загрузки */
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        .loading { animation: pulse 1.5s infinite; color: #888 !important; text-shadow: none !important; }
+        .loading { opacity: 0.5; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.7; } 100% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
     <div id="container">
-        <div id="last-update">Инициализация...</div>
+        <div id="last-update">Загрузка данных...</div>
         
         <div id="payout-amount" class="loading">---</div>
+        
+        <div class="explanation">получу, если поставлю $100</div>
 
-        <div class="sub-text">
-            <span id="probability">--</span>% шанс
-        </div>
-        <div class="sub-details">
+        <div class="stats">
+            Шанс: <span id="probability">--</span>% &nbsp;|&nbsp; 
             Цена акции: <span id="share-price">--</span>¢
         </div>
         
         <div id="status"></div>
     </div>
 
+    <div class="version">v3.1</div>
+
     <script>
-        // --- НАСТРОЙКИ ---
+        // --- КОНФИГУРАЦИЯ ---
         const SLUG = "russia-x-ukraine-ceasefire-in-2025";
-        const MY_BET = 100; // Ваша сумма ставки ($100)
+        const MY_BET = 100; // Расчет для ставки $100
         
-        // Прокси для обхода блокировки CORS (чтобы работало без сервера)
+        // Прокси
         const PROXY = "https://corsproxy.io/?";
         const API_URL = `https://gamma-api.polymarket.com/events?slug=${SLUG}`;
 
@@ -104,51 +121,39 @@
             const statusEl = document.getElementById('status');
 
             try {
-                // 1. Делаем запрос через прокси
+                // Запрос
                 const response = await fetch(PROXY + encodeURIComponent(API_URL));
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                if (!response.ok) throw new Error("Network response was not ok");
                 
                 const data = await response.json();
                 
-                // 2. Парсим ответ
+                // Парсинг
                 if (!data || !data.length) throw new Error("Event not found");
-                const market = data[0].markets[0]; // Берем первый рынок в событии
+                const market = data[0].markets[0]; 
                 
-                // Находим индекс "Yes"
+                // Ищем "Yes"
                 const outcomes = JSON.parse(market.outcomes);
                 const yesIndex = outcomes.indexOf("Yes");
-                if (yesIndex === -1) throw new Error("'Yes' outcome not found");
+                if (yesIndex === -1) throw new Error("No 'Yes' outcome");
 
-                // 3. ОПРЕДЕЛЯЕМ ЦЕНУ
-                // Сначала пытаемся найти 'bestAsk' (цена покупки из стакана), она точнее для расчета выигрыша.
-                // Если нет, берем outcomePrices (последняя сделка).
-                let rawPrice = 0;
-                
-                // Проверяем outcomePrices
+                // Ищем цену
                 const prices = JSON.parse(market.outcomePrices);
-                rawPrice = parseFloat(prices[yesIndex]);
+                let price = parseFloat(prices[yesIndex]);
 
-                // Если API отдало 'bestAsk', можно использовать его для еще большей точности "покупки сейчас",
-                // но в публичном списке событий bestAsk часто не передается.
-                // Поэтому мы берем rawPrice и считаем честно.
+                if (!price || price <= 0) throw new Error("Invalid price");
 
-                if (!rawPrice) throw new Error("Price is zero or invalid");
-
-                // 4. МАТЕМАТИКА
-                // Формула: (Мои $100 / Цена акции) * $1
-                // Пример: $100 / 0.09 = 1111 акций = $1111 выигрыш
-                const payout = MY_BET / rawPrice;
+                // --- РАСЧЕТ ВЫПЛАТЫ ---
+                // Формула: (Ставка / Цена) * 1
+                const payout = MY_BET / price;
                 
-                // Цена в центах (например 9.2)
-                const priceInCents = (rawPrice * 100).toFixed(1); 
-                
-                // Вероятность (округленная)
-                const probability = Math.round(rawPrice * 100);
+                // Детали для отображения
+                const priceInCents = (price * 100).toFixed(1); 
+                const probability = Math.round(price * 100);
 
-                // 5. ВЫВОД НА ЭКРАН
+                // --- ОБНОВЛЕНИЕ UI ---
                 amountEl.classList.remove('loading');
                 
-                // Форматируем сумму ($1,111)
+                // Отображаем сумму без копеек для чистоты (maximumFractionDigits: 0)
                 amountEl.innerText = payout.toLocaleString('en-US', {
                     style: 'currency', 
                     currency: 'USD', 
@@ -158,25 +163,21 @@
                 probEl.innerText = probability;
                 priceEl.innerText = priceInCents;
                 
-                // Время
                 const now = new Date();
-                timeEl.innerText = "Обновлено: " + now.toLocaleTimeString();
-                
-                // Скрываем ошибки, если были
+                timeEl.innerText = now.toLocaleTimeString(); // Только время
                 statusEl.style.display = 'none';
 
             } catch (err) {
                 console.error(err);
                 amountEl.classList.remove('loading');
-                amountEl.style.color = "#666"; // Серый цвет при ошибке
+                amountEl.style.color = "#444"; 
                 statusEl.style.display = 'block';
-                statusEl.innerText = "ОШИБКА: " + err.message + "\n(Проверьте интернет или попробуйте позже)";
+                statusEl.innerText = "Ошибка: " + err.message;
             }
         }
 
-        // Запускаем сразу и потом каждую минуту
         updateData();
-        setInterval(updateData, 60000);
+        setInterval(updateData, 60000); // Обновление раз в минуту
     </script>
 </body>
 </html>
