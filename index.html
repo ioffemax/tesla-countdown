@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polymarket Watcher v3.2</title>
+    <title>Polymarket Live Buy Price v4.0</title>
     <style>
         body {
             background-color: #000000;
@@ -26,64 +26,93 @@
             box-sizing: border-box;
         }
 
-        /* Время обновления */
+        /* Верхняя информация */
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         #last-update {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #555;
-            margin-bottom: 10px;
             font-family: monospace;
         }
 
         /* Главная сумма (Выплата) */
         #payout-amount {
-            font-size: 18vw; /* Чуть уменьшил, чтобы влезало с отступами */
+            font-size: 18vw; 
             font-weight: 800;
-            line-height: 1.1; /* Увеличил, чтобы буквы не срезались */
+            line-height: 1.1; 
             color: #4ade80;
-            text-shadow: 0 0 40px rgba(74, 222, 128, 0.15);
-            margin: 0 0 20px 0; /* Добавил отступ снизу */
-            letter-spacing: -2px;
+            text-shadow: 0 0 50px rgba(74, 222, 128, 0.2);
+            margin: 0;
+            letter-spacing: -3px;
         }
 
-        /* Пояснение под цифрой */
+        /* Пояснение */
         .explanation {
             font-size: 1.5rem;
             color: #888;
-            margin-bottom: 30px; /* Отступ до плашки со статистикой */
+            margin-bottom: 30px; 
             font-weight: 400;
         }
 
         /* Технические детали */
-        .stats {
-            font-size: 1.1rem;
-            color: #666;
-            border: 1px solid #333;
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 50px;
-            background: #111;
+        .stats-box {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
 
-        .stats span { color: #aaa; font-weight: bold; }
+        .stat-item {
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: #111;
+            font-size: 1.1rem;
+            color: #666;
+            min-width: 120px;
+        }
 
-        /* Версия - сделал ярче */
+        .stat-value {
+            display: block;
+            font-size: 1.4rem;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Версия */
         .version {
             position: fixed;
             bottom: 15px;
             right: 15px;
-            font-size: 0.9rem;
-            color: #666; /* Был #333, стал светлее */
+            font-size: 0.8rem;
+            color: #444; 
             font-family: monospace;
-            background: #000; /* Подложка на случай наложения */
-            padding: 2px 5px;
+            background: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #222;
         }
 
-        /* Статус ошибок */
+        /* Ошибки */
         #status {
             font-size: 1rem;
             color: #ef4444;
             margin-top: 20px;
             display: none; 
+            background: rgba(239, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .loading { opacity: 0.5; animation: pulse 1.5s infinite ease-in-out; }
@@ -93,87 +122,42 @@
 <body>
 
     <div id="container">
-        <div id="last-update">Загрузка...</div>
+        <div class="header-info">
+            <div id="last-update">Подключение...</div>
+        </div>
         
         <div id="payout-amount" class="loading">---</div>
         
-        <div class="explanation">получу, если поставлю $100</div>
+        <div class="explanation">получу, если куплю "Yes" на $100 сейчас</div>
 
-        <div class="stats">
-            Шанс: <span id="probability">--</span>% &nbsp;|&nbsp; 
-            Цена акции: <span id="share-price">--</span>¢
+        <div class="stats-box">
+            <div class="stat-item">
+                <span class="stat-value" id="buy-price">--</span>
+                <span class="stat-label">Цена покупки</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="probability">--</span>
+                <span class="stat-label">Шанс</span>
+            </div>
         </div>
         
         <div id="status"></div>
     </div>
 
-    <div class="version">v3.2</div>
+    <div class="version">v4.0 (Live Orderbook)</div>
 
     <script>
         // --- КОНФИГУРАЦИЯ ---
         const SLUG = "russia-x-ukraine-ceasefire-in-2025";
         const MY_BET = 100; 
         
+        // Используем прокси
         const PROXY = "https://corsproxy.io/?";
-        const API_URL = `https://gamma-api.polymarket.com/events?slug=${SLUG}`;
+        const API_BASE = "https://gamma-api.polymarket.com";
 
         async function updateData() {
             const amountEl = document.getElementById('payout-amount');
             const probEl = document.getElementById('probability');
-            const priceEl = document.getElementById('share-price');
+            const priceEl = document.getElementById('buy-price');
             const timeEl = document.getElementById('last-update');
-            const statusEl = document.getElementById('status');
-
-            try {
-                const response = await fetch(PROXY + encodeURIComponent(API_URL));
-                if (!response.ok) throw new Error("Network response was not ok");
-                
-                const data = await response.json();
-                
-                if (!data || !data.length) throw new Error("Event not found");
-                const market = data[0].markets[0]; 
-                
-                const outcomes = JSON.parse(market.outcomes);
-                const yesIndex = outcomes.indexOf("Yes");
-                if (yesIndex === -1) throw new Error("No 'Yes' outcome");
-
-                // Пытаемся получить самую точную цену
-                const prices = JSON.parse(market.outcomePrices);
-                let price = parseFloat(prices[yesIndex]);
-
-                if (!price || price <= 0) throw new Error("Invalid price");
-
-                // Расчет
-                const payout = MY_BET / price;
-                const priceInCents = (price * 100).toFixed(1); 
-                const probability = Math.round(price * 100);
-
-                // Вывод
-                amountEl.classList.remove('loading');
-                amountEl.innerText = payout.toLocaleString('en-US', {
-                    style: 'currency', 
-                    currency: 'USD', 
-                    maximumFractionDigits: 0 
-                });
-
-                probEl.innerText = probability;
-                priceEl.innerText = priceInCents;
-                
-                const now = new Date();
-                timeEl.innerText = now.toLocaleTimeString();
-                statusEl.style.display = 'none';
-
-            } catch (err) {
-                console.error(err);
-                amountEl.classList.remove('loading');
-                amountEl.style.color = "#444"; 
-                statusEl.style.display = 'block';
-                statusEl.innerText = "Ошибка: " + err.message;
-            }
-        }
-
-        updateData();
-        setInterval(updateData, 60000);
-    </script>
-</body>
-</html>
+            const statusEl = document.getElementById
