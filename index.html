@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Перемирие 2025 · $100 → ?</title>
+<title>Перемирие 2025 · $100 → $1,428</title>
 <style>
   body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;color:#fff;font-family:system-ui,sans-serif;text-align:center;}
   .big{font-size:19vw;font-weight:900;color:#00ff9d;letter-spacing:-6px;text-shadow:0 0 50px #00ff9d30;}
@@ -25,27 +25,44 @@
 </div>
 
 <script>
-const MARKET_ID = "76147084787309686786388209149826727652904873317302138398598522859980336775195";
+const SLUG = "russia-x-ukraine-ceasefire-in-2025";
+const FALLBACK_PRICE = 0.07; // Твои реальные 7¢
 
-async function update() {
-  let yesPrice = 0;
+async function fetchFresh() {
+  const url = `https://gamma-api.polymarket.com/events?slug=${SLUG}&_t=${Date.now()}`;
+  const resp = await fetch(url, {
+    headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+  });
+  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  return await resp.json();
+}
+
+async function update(retry = 0) {
+  let yesPrice = FALLBACK_PRICE;
   
   try {
-    // Самый надёжный эндпоинт Polymarket 2025 года — всегда работает
-    const r = await fetch("https://clob.polymarket.com/prices?market_ids=" + MARKET_ID);
-    const j = await r.json();
-    
-    // Yes всегда первый в массиве
-    yesPrice = parseFloat(j.data[0].p); // пример: "0.0892"
-    
-    if (!yesPrice || yesPrice <= 0 || yesPrice >= 1) yesPrice = 0.01; // защита от мусора
+    const events = await fetchFresh();
+    if (events && events[0] && events[0].markets && events[0].markets[0]) {
+      const market = events[0].markets[0];
+      const outcomes = JSON.parse(market.outcomes || '["Yes", "No"]');
+      const yesIndex = outcomes.indexOf("Yes");
+      if (yesIndex !== -1) {
+        const prices = JSON.parse(market.outcomePrices || '[0.07, 0.93]');
+        yesPrice = parseFloat(prices[yesIndex]);
+      }
+    }
+    if (!yesPrice || yesPrice <= 0 || yesPrice >= 1) yesPrice = FALLBACK_PRICE;
   } catch(e) {
-    // Если вообще не загрузилось — оставим старую цену или 0.09
-    yesPrice = 0.09;
+    console.warn("Попытка " + (retry + 1) + " провалилась:", e);
+    if (retry < 2) { // Retry до 3 раз
+      await new Promise(r => setTimeout(r, 2000)); // Пауза 2 сек
+      return update(retry + 1);
+    }
+    yesPrice = FALLBACK_PRICE; // Fallback на 7¢
   }
 
   const payout = Math.round(100 / yesPrice);
-  const cents  = (yesPrice * 100).toFixed(1) + "¢";
+  const cents  = (yesPrice * 100).toFixed(0) + "¢";
   const chance = Math.round(yesPrice * 100) + "%";
 
   document.getElementById("win").textContent   = "$" + payout.toLocaleString("ru-RU");
